@@ -5,7 +5,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header con Logo */}
-      <header className="w-full py-6 px-6">
+      <header className="w-full py-4 px-6">
         <Link href="/" className="inline-block">
           <Image
             src="/images/dottorsconto-logo.png"
@@ -19,7 +19,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-start md:items-center justify-center px-4 pb-12 pt-4 md:pt-0">
+      <main className="flex-1 flex items-start md:items-center justify-center px-4 py-6 md:py-0">
         <div className="w-full max-w-md">
           {/* Card */}
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-10">

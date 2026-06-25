@@ -1,37 +1,49 @@
 import Link from "next/link";
-import { ArrowRight, Clock, CheckCircle } from "lucide-react";
+import { ArrowRight, Clock, MapPin } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentClinic } from "@/lib/supabase/getClinic";
 
-const leads = [
-  {
-    id: 1,
-    patient: "Marco R.",
-    treatment: "Implantologia",
-    city: "Milano",
-    budget: "€3.000-5.000",
-    status: "new",
-    time: "2 ore fa",
-  },
-  {
-    id: 2,
-    patient: "Giulia M.",
-    treatment: "Trapianto capelli",
-    city: "Roma",
-    budget: "€5.000-8.000",
-    status: "contacted",
-    time: "5 ore fa",
-  },
-  {
-    id: 3,
-    patient: "Alessandro B.",
-    treatment: "Sbiancamento",
-    city: "Torino",
-    budget: "€500-1.000",
-    status: "new",
-    time: "1 giorno fa",
-  },
-];
+export default async function RecentLeads() {
+  const supabase = await createClient();
+  const clinicData = await getCurrentClinic();
+  
+  if (!clinicData?.clinic) {
+    return (
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-6 w-32 bg-gray-200 rounded"></div>
+          <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-20 bg-gray-100 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
-export default function RecentLeads() {
+  const { data: recentMatches } = await supabase
+    .from("matches")
+    .select(`
+      *,
+      checkups:checkups (
+        id,
+        category,
+        issue,
+        budget,
+        city,
+        status,
+        created_at,
+        patients:patients (
+          name,
+          email
+        )
+      )
+    `)
+    .eq("clinic_id", clinicData.clinic.id)
+    .order("created_at", { ascending: false })
+    .limit(5);
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
       <div className="p-6 border-b border-gray-200">
@@ -44,34 +56,61 @@ export default function RecentLeads() {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {leads.map((lead) => (
-          <div key={lead.id} className="p-4 hover:bg-gray-50 transition">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <div className="font-semibold text-gray-900">{lead.patient}</div>
-                <div className="text-sm text-gray-600">{lead.treatment}</div>
+        {recentMatches && recentMatches.length > 0 ? (
+          recentMatches.map((match: any) => {
+            const checkup = match.checkups;
+            const patient = checkup?.patients;
+            return (
+              <div key={match.id} className="p-4 hover:bg-gray-50 transition">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <div className="font-semibold text-gray-900">
+                      {patient?.name || "Paziente anonimo"}
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      {checkup?.category || "Categoria non specificata"}
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    match.status === "pending" 
+                      ? "bg-red-100 text-red-700" 
+                      : match.status === "accepted"
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-700"
+                  }`}>
+                    {match.status === "pending" ? "Nuovo" : match.status === "accepted" ? "Accettato" : "Rifiutato"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                  {checkup?.city && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {checkup.city}
+                    </span>
+                  )}
+                  {checkup?.budget && <span>•</span>}
+                  {checkup?.budget && <span>{checkup.budget}</span>}
+                </div>
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <Clock className="w-3 h-3" />
+                  {new Date(match.created_at).toLocaleDateString("it-IT", {
+                    day: "numeric",
+                    month: "short",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </div>
               </div>
-              {lead.status === "new" ? (
-                <span className="px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">
-                  Nuovo
-                </span>
-              ) : (
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                  Contattato
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
-              <span>{lead.city}</span>
-              <span>•</span>
-              <span>{lead.budget}</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-gray-400">
-              <Clock className="w-3 h-3" />
-              {lead.time}
+            );
+          })
+        ) : (
+          <div className="p-8 text-center">
+            <div className="text-gray-400 mb-2">Nessun lead ricevuto</div>
+            <div className="text-sm text-gray-500">
+              I lead appariranno qui quando i pazienti ti invieranno richieste
             </div>
           </div>
-        ))}
+        )}
       </div>
 
       <div className="p-4 border-t border-gray-200">
