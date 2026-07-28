@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { requireUserRole } from "@/lib/auth/get-user-context";
 import Link from "next/link";
 import Image from "next/image";
 import { brand } from "@/lib/brand";
@@ -16,17 +16,14 @@ import UpcomingAppointments from "@/components/clinics/UpcomingAppointments";
 import QuickActions from "@/components/clinics/QuickActions";
 
 export default async function ClinicDashboard() {
+  const context = await requireUserRole("clinic");
   const supabase = await createClient();
-
-  // Protezione route
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect("/login");
 
   // Fetch dati clinica per header personalizzato
   const { data: clinic } = await supabase
     .from("clinics")
     .select("name, category")
-    .eq("user_id", session.user.id)
+    .eq("user_id", context.user.id)
     .single();
 
   return (

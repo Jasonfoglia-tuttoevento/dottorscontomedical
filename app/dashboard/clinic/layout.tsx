@@ -1,11 +1,14 @@
 import ClinicSidebar from "@/components/clinics/ClinicSidebar";
 import DashboardHeader from "@/components/dashboard/shared/DashboardHeader";
+import { requireUserRole } from "@/lib/auth/get-user-context";
 
-export default function ClinicDashboardLayout({
+export default async function ClinicDashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await requireUserRole("clinic");
+
   return (
     <div className="flex h-screen bg-gray-50">
       <ClinicSidebar />

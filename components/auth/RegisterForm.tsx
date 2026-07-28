@@ -6,8 +6,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff, User, Building2 } from "lucide-react";
 
-export default function RegisterForm() {
-  const [role, setRole] = useState<"patient" | "clinic">("patient");
+interface RegisterFormProps {
+  initialRole?: "patient" | "clinic";
+}
+
+export default function RegisterForm({ initialRole = "patient" }: RegisterFormProps) {
+  const [role, setRole] = useState<"patient" | "clinic">(initialRole);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -48,9 +52,11 @@ export default function RegisterForm() {
         return;
       }
 
-      if (data.user) {
+      if (data.session) {
         router.push("/dashboard");
         router.refresh();
+      } else if (data.user) {
+        router.push("/login?registered=check-email");
       } else {
         setFormError("Registrazione completata ma utente non trovato. Controlla la tua email.");
       }

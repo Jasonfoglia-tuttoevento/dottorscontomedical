@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { requireUserRole } from "@/lib/auth/get-user-context";
 import Link from "next/link";
 import Image from "next/image";
 import { brand } from "@/lib/brand";
@@ -9,17 +9,14 @@ import {
 } from "lucide-react";
 
 export default async function PatientDashboard() {
+  const context = await requireUserRole("patient");
   const supabase = await createClient();
-
-  // Verifica sessione (in produzione usa middleware)
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) redirect("/login");
 
   // Fetch checkups del paziente (usa patient_email come chiave per ora)
   const { data: checkups } = await supabase
     .from("checkups")
     .select("*")
-    .eq("patient_email", session.user.email)
+    .eq("patient_email", context.user.email)
     .order("created_at", { ascending: false });
 
   const getStatusBadge = (status: string) => {
@@ -43,7 +40,7 @@ export default async function PatientDashboard() {
           <div className="flex items-center gap-4">
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
               <User className="w-4 h-4" />
-              <span className="font-medium truncate max-w-[150px]">{session.user.email}</span>
+              <span className="font-medium truncate max-w-[150px]">{context.user.email}</span>
             </div>
             <form action="/auth/signout" method="POST">
               <button type="submit" className="p-2 text-gray-400 hover:text-[#0D47A1] transition rounded-full hover:bg-[#E6FAF5]">

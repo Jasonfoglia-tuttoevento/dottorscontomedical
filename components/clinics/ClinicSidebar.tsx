@@ -65,10 +65,12 @@ export default function ClinicSidebar() {
       </nav>
 
       <div className="p-4 border-t border-gray-800">
-        <button className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition w-full">
-          <LogOut className="w-5 h-5" />
-          <span className="font-medium">Esci</span>
-        </button>
+        <form action="/auth/signout" method="POST">
+          <button type="submit" className="flex items-center gap-3 px-4 py-3 text-gray-400 hover:bg-gray-800 hover:text-white rounded-lg transition w-full">
+            <LogOut className="w-5 h-5" />
+            <span className="font-medium">Esci</span>
+          </button>
+        </form>
       </div>
     </aside>
   );

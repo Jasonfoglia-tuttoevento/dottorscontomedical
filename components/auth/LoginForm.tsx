@@ -6,7 +6,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
-export default function LoginForm() {
+interface LoginFormProps {
+  emailConfirmationRequired?: boolean;
+}
+
+export default function LoginForm({ emailConfirmationRequired = false }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,6 +51,12 @@ export default function LoginForm() {
       </div>
 
       {/* Error */}
+      {emailConfirmationRequired && !error && (
+        <div className="mb-4 rounded-lg border border-[#99E7DB] bg-[#E6FAF5] p-3 text-sm text-[#0B3B86]">
+          Registrazione completata. Controlla la tua email per confermare l’account, poi accedi.
+        </div>
+      )}
+
       {error && (
         <div className="mb-4 p-3 bg-[#E6FAF5] border border-[#99E7DB] text-[#0B3B86] rounded-lg text-sm">
           {error}
