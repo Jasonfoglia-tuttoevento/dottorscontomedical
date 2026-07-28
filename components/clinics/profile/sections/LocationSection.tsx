@@ -3,12 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Save, MapPin } from "lucide-react";
-
-interface Clinic {
-  id: string;
-  address: string | null;
-  city: string | null;
-}
+import type { Clinic } from "@/lib/types/database";
 
 export default function LocationSection({ clinic }: { clinic: Clinic }) {
   const [loading, setLoading] = useState(false);

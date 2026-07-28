@@ -1,47 +1,26 @@
 import { Users, Clock, CheckCircle, XCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { countClinicMatches } from "@/lib/data/matches";
 
 export default async function LeadStats() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
   
   if (!clinicData?.clinic) return null;
 
   const clinicId = clinicData.clinic.id;
 
-  // Totali
-  const { count: total } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId);
-
-  // Nuovi (pending)
-  const { count: newLeads } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId)
-    .eq("status", "pending");
-
-  // Accettati
-  const { count: accepted } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId)
-    .eq("status", "accepted");
-
-  // Rifiutati
-  const { count: rejected } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId)
-    .eq("status", "rejected");
+  const [total, newLeads, accepted, rejected] = await Promise.all([
+    countClinicMatches(clinicId),
+    countClinicMatches(clinicId, { status: "pending" }),
+    countClinicMatches(clinicId, { status: "accepted" }),
+    countClinicMatches(clinicId, { status: "rejected" }),
+  ]);
 
   const stats = [
-    { icon: Users, label: "Totali", value: total || 0, color: "gray", bgColor: "bg-gray-100" },
-    { icon: Clock, label: "Nuovi", value: newLeads || 0, color: "red", bgColor: "bg-[#CCF3EC]" },
-    { icon: CheckCircle, label: "Accettati", value: accepted || 0, color: "green", bgColor: "bg-green-100" },
-    { icon: XCircle, label: "Rifiutati", value: rejected || 0, color: "orange", bgColor: "bg-orange-100" },
+    { icon: Users, label: "Totali", value: total, color: "gray", bgColor: "bg-gray-100" },
+    { icon: Clock, label: "Nuovi", value: newLeads, color: "red", bgColor: "bg-[#CCF3EC]" },
+    { icon: CheckCircle, label: "Accettati", value: accepted, color: "green", bgColor: "bg-green-100" },
+    { icon: XCircle, label: "Rifiutati", value: rejected, color: "orange", bgColor: "bg-orange-100" },
   ];
 
   return (

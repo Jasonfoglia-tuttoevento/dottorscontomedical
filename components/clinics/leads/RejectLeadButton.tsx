@@ -1,25 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { setMatchStatus } from "@/app/dashboard/clinic/leads/actions";
 
 export default function RejectLeadButton({ matchId }: { matchId: string }) {
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const router = useRouter();
 
   const handleReject = async () => {
     if (!confirm("Sei sicuro di voler rifiutare questo lead?")) return;
     
     setLoading(true);
     
-    const { error } = await supabase
-      .from("matches")
-      .update({ status: "rejected" })
-      .eq("id", matchId);
+    const result = await setMatchStatus(matchId, "rejected");
 
-    if (!error) {
-      window.location.reload();
+    if (result.ok) {
+      router.refresh();
     }
     
     setLoading(false);

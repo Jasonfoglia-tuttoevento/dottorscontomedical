@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { getPublicClinics } from "@/lib/data/clinics";
 import { MapPin, Star, CheckCircle2, ArrowUpRight, Euro, SearchX } from "lucide-react";
 import Image from "next/image";
 
@@ -20,45 +20,17 @@ export default async function ClinicList({
   minRating = 0,
   priceRange = "all"
 }: Props) {
-  const supabase = await createClient();
-
-  // Costruzione query dinamica con tutti i nuovi filtri
-  let query = supabase.from("clinics").select("*");
-
-  if (category && category !== "all") {
-    query = query.eq("category", category);
-  }
-  if (city) {
-    query = query.ilike("city", `%${city}%`);
-  }
-  if (verified) {
-    query = query.eq("verified", true);
-  }
-
-  // Ricerca testuale su nome e descrizione
-  if (searchQuery) {
-    query = query.or(
-      `name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`
-    );
-  }
-
-  // Filtro Rating (Nota: richiede colonna 'rating' nella tabella clinics)
-  if (minRating > 0) {
-    query = query.gte("rating", minRating);
-  }
-
-  // Filtro Fascia di Prezzo (richiede colonna 'price_level': 1=econ, 2=medio, 3=alto)
-  if (priceRange && priceRange !== "all") {
-    const priceMap: Record<string, number> = { low: 1, medium: 2, high: 3 };
-    if (priceMap[priceRange]) {
-      query = query.eq("price_level", priceMap[priceRange]);
-    }
-  }
-
-  const { data: clinics } = await query.order("created_at", { ascending: false });
+  const clinics = await getPublicClinics({
+    category,
+    city,
+    verified,
+    searchQuery,
+    minRating,
+    priceRange,
+  });
 
   // Gestione stato vuoto o errore
-  if (!clinics || clinics.length === 0) {
+  if (clinics.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center bg-white rounded-[2rem] border border-gray-100 shadow-sm">
         <div className="w-24 h-24 bg-[#E6FAF5] rounded-full flex items-center justify-center mb-6 animate-pulse">

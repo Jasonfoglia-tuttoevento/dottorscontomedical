@@ -3,13 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Save, Phone, Mail, Globe } from "lucide-react";
-
-interface Clinic {
-  id: string;
-  phone: string | null;
-  email: string | null;
-  website: string | null;
-}
+import type { Clinic } from "@/lib/types/database";
 
 export default function ContactSection({ clinic }: { clinic: Clinic }) {
   const [loading, setLoading] = useState(false);

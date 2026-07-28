@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { Calendar, MapPin, ArrowRight } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { getClinicMatches } from "@/lib/data/matches";
 
 export default async function UpcomingAppointments() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
 
   if (!clinicData?.clinic) {
@@ -24,20 +23,10 @@ export default async function UpcomingAppointments() {
 
   // Per ora mostriamo i match accettati come "appuntamenti"
   // In futuro avremo una tabella appointments dedicata
-  const { data: appointments } = await supabase
-    .from("matches")
-    .select(`
-      *,
-      checkups:checkups (
-        category,
-        issue,
-        patients:patients (name, phone)
-      )
-    `)
-    .eq("clinic_id", clinicData.clinic.id)
-    .eq("status", "accepted")
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const appointments = await getClinicMatches(clinicData.clinic.id, {
+    status: "accepted",
+    limit: 5,
+  });
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -51,13 +40,13 @@ export default async function UpcomingAppointments() {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {appointments && appointments.length > 0 ? (
+        {appointments.length > 0 ? (
           appointments.map((apt) => (
             <div key={apt.id} className="p-4 hover:bg-gray-50 transition">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="font-semibold text-gray-900">
-                    {apt.checkups?.patients?.name || "Paziente"}
+                    {apt.checkups?.patient_name || "Paziente"}
                   </div>
                   <div className="text-sm text-gray-600">
                     {apt.checkups?.category || "Visita"}
@@ -72,10 +61,10 @@ export default async function UpcomingAppointments() {
                   <Calendar className="w-3 h-3" />
                   {new Date(apt.created_at).toLocaleDateString("it-IT")}
                 </span>
-                {apt.checkups?.patients?.phone && (
+                {apt.checkups?.patient_phone && (
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    {apt.checkups.patients.phone}
+                    {apt.checkups.patient_phone}
                   </span>
                 )}
               </div>

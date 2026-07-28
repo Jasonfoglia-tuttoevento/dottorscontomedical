@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { getUserContext } from "@/lib/auth/get-user-context";
+import { getClinicByOwnerId } from "@/lib/data/clinics";
 
 export async function getCurrentClinic() {
   const context = await getUserContext();
@@ -8,14 +8,7 @@ export async function getCurrentClinic() {
     return null;
   }
 
-  const supabase = await createClient();
-
-  // Ottieni clinica
-  const { data: clinic } = await supabase
-    .from("clinics")
-    .select("*")
-    .eq("owner_id", context.user.id)
-    .single();
+  const clinic = await getClinicByOwnerId(context.user.id);
 
   return { user: context.user, profile: context.profile, clinic };
 }

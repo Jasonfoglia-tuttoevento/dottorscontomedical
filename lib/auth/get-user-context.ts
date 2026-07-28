@@ -4,6 +4,7 @@ import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { isUserRole, type UserRole } from "@/lib/auth/roles";
+import type { Profile } from "@/lib/types/database";
 
 interface ProfileRecord {
   id: string;
@@ -15,7 +16,7 @@ export type UserContext =
   | { status: "profile-unavailable"; user: User; profile: null; role: null }
   | { status: "missing-profile"; user: User; profile: null; role: null }
   | { status: "invalid-role"; user: User; profile: ProfileRecord; role: null }
-  | { status: "authenticated"; user: User; profile: ProfileRecord; role: UserRole };
+  | { status: "authenticated"; user: User; profile: Profile; role: UserRole };
 
 export async function getUserContext(): Promise<UserContext> {
   const supabase = await createClient();
@@ -45,7 +46,12 @@ export async function getUserContext(): Promise<UserContext> {
     return { status: "invalid-role", user, profile, role: null };
   }
 
-  return { status: "authenticated", user, profile, role: profile.role };
+  return {
+    status: "authenticated",
+    user,
+    profile: { id: profile.id, role: profile.role },
+    role: profile.role,
+  };
 }
 
 export async function requireUserRole(

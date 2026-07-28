@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { submitCheckup } from "@/app/check-up/actions";
 import { brand } from "@/lib/brand";
 import {
   ArrowRight, ArrowLeft, CheckCircle2, User, Phone,
@@ -19,8 +19,6 @@ const STEPS = [
 
 export default function CheckUpPage() {
   const router = useRouter();
-  const supabase = createClient();
-
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,20 +53,17 @@ export default function CheckUpPage() {
     setError(null);
 
     try {
-      const { error: dbError } = await supabase.from("checkups").insert([
-        {
-          category: formData.category,
-          treatment: formData.treatment,
-          city: formData.city || null,
-          patient_name: formData.name,
-          patient_phone: formData.phone,
-          patient_email: formData.email,
-          notes: formData.notes || null,
-          status: "new",
-        }
-      ]);
+      const result = await submitCheckup({
+        category: formData.category,
+        treatment: formData.treatment,
+        city: formData.city || null,
+        patient_name: formData.name,
+        patient_phone: formData.phone,
+        patient_email: formData.email,
+        notes: formData.notes || null,
+      });
 
-      if (dbError) throw dbError;
+      if (!result.ok) throw new Error(result.error);
       router.push("/check-up/success");
 
     } catch (err: unknown) {

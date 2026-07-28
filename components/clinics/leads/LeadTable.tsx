@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { Eye, MessageSquare, Check, X, Clock, MapPin, Euro } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { Eye, MessageSquare, Check, X, Clock, MapPin } from "lucide-react";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { getClinicMatches } from "@/lib/data/matches";
 import AcceptLeadButton from "./AcceptLeadButton";
 import RejectLeadButton from "./RejectLeadButton";
 
 export default async function LeadTable() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
 
   if (!clinicData?.clinic) {
@@ -17,30 +16,9 @@ export default async function LeadTable() {
     );
   }
 
-  const { data: matches } = await supabase
-    .from("matches")
-    .select(`
-      *,
-      checkups:checkups (
-        id,
-        category,
-        issue,
-        budget,
-        city,
-        status,
-        created_at,
-        patients:patients (
-          id,
-          name,
-          email,
-          phone
-        )
-      )
-    `)
-    .eq("clinic_id", clinicData.clinic.id)
-    .order("created_at", { ascending: false });
+  const matches = await getClinicMatches(clinicData.clinic.id);
 
-  if (!matches || matches.length === 0) {
+  if (matches.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
         <div className="text-gray-400 mb-2">Nessun lead ricevuto</div>
@@ -64,9 +42,6 @@ export default async function LeadTable() {
                 Trattamento
               </th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Budget
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                 Città
               </th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -83,30 +58,22 @@ export default async function LeadTable() {
           <tbody className="divide-y divide-gray-200">
             {matches.map((match) => {
               const checkup = match.checkups;
-              const patient = checkup?.patients;
-
               return (
                 <tr key={match.id} className="hover:bg-gray-50 transition">
                   <td className="px-6 py-4">
                     <div>
                       <div className="font-semibold text-gray-900">
-                        {patient?.name || "Anonimo"}
+                        {checkup?.patient_name || "Anonimo"}
                       </div>
-                      {patient?.email && (
-                        <div className="text-sm text-gray-500">{patient.email}</div>
+                      {checkup?.patient_email && (
+                        <div className="text-sm text-gray-500">{checkup.patient_email}</div>
                       )}
                     </div>
                   </td>
                   <td className="px-6 py-4">
                     <div>
                       <div className="font-medium text-gray-900">{checkup?.category}</div>
-                      <div className="text-sm text-gray-500 line-clamp-1">{checkup?.issue}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-1 text-gray-700">
-                      <Euro className="w-4 h-4 text-gray-400" />
-                      {checkup?.budget || "Non specificato"}
+                      <div className="text-sm text-gray-500 line-clamp-1">{checkup?.treatment}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4">
@@ -159,7 +126,7 @@ export default async function LeadTable() {
                         </>
                       ) : (
                         <Link
-                          href={`/dashboard/clinic/messages?patient=${patient?.id}`}
+                          href={`/dashboard/clinic/messages?checkup=${checkup?.id}`}
                           className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
                           title="Invia messaggio"
                         >

@@ -1,8 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { getClinicMatches } from "@/lib/data/matches";
 
 export default async function PerformanceChart() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
 
   if (!clinicData?.clinic) {
@@ -24,11 +23,9 @@ export default async function PerformanceChart() {
   const sixMonthsAgo = new Date();
   sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-  const { data: matches } = await supabase
-    .from("matches")
-    .select("created_at")
-    .eq("clinic_id", clinicData.clinic.id)
-    .gte("created_at", sixMonthsAgo.toISOString());
+  const matches = await getClinicMatches(clinicData.clinic.id, {
+    since: sixMonthsAgo.toISOString(),
+  });
 
   // Raggruppa per mese
   const months = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
@@ -42,15 +39,13 @@ export default async function PerformanceChart() {
     };
   });
 
-  if (matches) {
-    matches.forEach((match) => {
+  matches.forEach((match) => {
       const matchMonth = new Date(match.created_at).getMonth();
       const diff = (currentMonth - matchMonth + 12) % 12;
       if (diff < 6) {
         monthlyData[5 - diff].leads++;
       }
-    });
-  }
+  });
 
   const maxValue = Math.max(...monthlyData.map((d) => d.leads), 1);
 

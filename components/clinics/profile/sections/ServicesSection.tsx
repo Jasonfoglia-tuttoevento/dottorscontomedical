@@ -3,18 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Plus, Trash2, Edit3, X, Check, Clock, Euro, FileText } from "lucide-react";
-
-interface Clinic {
-  id: string;
-}
-
-interface Service {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number | null;
-  duration_minutes: number | null;
-}
+import type { Clinic, Service } from "@/lib/types/database";
 
 export default function ServicesSection({ clinic, services: initialServices }: { clinic: Clinic; services: Service[] }) {
   const [services, setServices] = useState<Service[]>(initialServices);

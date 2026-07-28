@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { requireUserRole } from "@/lib/auth/get-user-context";
+import { getClinicByOwnerId } from "@/lib/data/clinics";
 import Link from "next/link";
 import Image from "next/image";
 import { brand } from "@/lib/brand";
@@ -17,14 +17,7 @@ import QuickActions from "@/components/clinics/QuickActions";
 
 export default async function ClinicDashboard() {
   const context = await requireUserRole("clinic");
-  const supabase = await createClient();
-
-  // Fetch dati clinica per header personalizzato
-  const { data: clinic } = await supabase
-    .from("clinics")
-    .select("name, category")
-    .eq("user_id", context.user.id)
-    .single();
+  const clinic = await getClinicByOwnerId(context.user.id);
 
   return (
     <div className="min-h-screen bg-gray-50 flex">

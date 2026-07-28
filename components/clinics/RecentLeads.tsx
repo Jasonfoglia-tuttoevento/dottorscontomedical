@@ -1,10 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Clock, MapPin } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { getClinicMatches } from "@/lib/data/matches";
 
 export default async function RecentLeads() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
 
   if (!clinicData?.clinic) {
@@ -22,27 +21,7 @@ export default async function RecentLeads() {
     );
   }
 
-  const { data: recentMatches } = await supabase
-    .from("matches")
-    .select(`
-      *,
-      checkups:checkups (
-        id,
-        category,
-        issue,
-        budget,
-        city,
-        status,
-        created_at,
-        patients:patients (
-          name,
-          email
-        )
-      )
-    `)
-    .eq("clinic_id", clinicData.clinic.id)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const recentMatches = await getClinicMatches(clinicData.clinic.id, { limit: 5 });
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
@@ -56,16 +35,15 @@ export default async function RecentLeads() {
       </div>
 
       <div className="divide-y divide-gray-200">
-        {recentMatches && recentMatches.length > 0 ? (
+        {recentMatches.length > 0 ? (
           recentMatches.map((match) => {
             const checkup = match.checkups;
-            const patient = checkup?.patients;
             return (
               <div key={match.id} className="p-4 hover:bg-gray-50 transition">
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <div className="font-semibold text-gray-900">
-                      {patient?.name || "Paziente anonimo"}
+                      {checkup?.patient_name || "Paziente anonimo"}
                     </div>
                     <div className="text-sm text-gray-600">
                       {checkup?.category || "Categoria non specificata"}
@@ -88,8 +66,6 @@ export default async function RecentLeads() {
                       {checkup.city}
                     </span>
                   )}
-                  {checkup?.budget && <span>•</span>}
-                  {checkup?.budget && <span>{checkup.budget}</span>}
                 </div>
                 <div className="flex items-center gap-1 text-xs text-gray-400">
                   <Clock className="w-3 h-3" />

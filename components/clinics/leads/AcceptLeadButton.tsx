@@ -1,23 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { setMatchStatus } from "@/app/dashboard/clinic/leads/actions";
 
 export default function AcceptLeadButton({ matchId }: { matchId: string }) {
   const [loading, setLoading] = useState(false);
-  const supabase = createClient();
+  const router = useRouter();
 
   const handleAccept = async () => {
     setLoading(true);
     
-    const { error } = await supabase
-      .from("matches")
-      .update({ status: "accepted" })
-      .eq("id", matchId);
+    const result = await setMatchStatus(matchId, "accepted");
 
-    if (!error) {
-      window.location.reload();
+    if (result.ok) {
+      router.refresh();
     }
     
     setLoading(false);

@@ -3,12 +3,7 @@
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Upload, Image as ImageIcon, X } from "lucide-react";
-
-interface Clinic {
-  id: string;
-  logo_url: string | null;
-  cover_url: string | null;
-}
+import type { Clinic } from "@/lib/types/database";
 
 export default function GallerySection({ clinic }: { clinic: Clinic }) {
   const [uploading, setUploading] = useState<string | null>(null);

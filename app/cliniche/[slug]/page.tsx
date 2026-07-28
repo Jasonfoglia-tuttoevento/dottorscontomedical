@@ -1,19 +1,12 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getPublicClinicBySlug } from "@/lib/data/clinics";
+import type { Service } from "@/lib/types/database";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Phone, Mail, Globe, Clock, CheckCircle2, Star, ArrowLeft, Euro } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
-}
-
-interface ClinicService {
-  id: string;
-  name: string;
-  price?: string | number | null;
-  description?: string | null;
-  duration_minutes?: number | null;
 }
 
 interface OpeningHour {
@@ -25,16 +18,9 @@ interface OpeningHour {
 
 export default async function ClinicDetailPage({ params }: Props) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const clinic = await getPublicClinicBySlug(slug);
 
-  // Fetch Clinica
-  const { data: clinic, error } = await supabase
-    .from("clinics")
-    .select("*, services(*)") // Join con tabella services
-    .eq("slug", slug)
-    .single();
-
-  if (error || !clinic) {
+  if (!clinic) {
     return notFound();
   }
 
@@ -133,7 +119,7 @@ export default async function ClinicDetailPage({ params }: Props) {
             <section>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Trattamenti e Prezzi</h2>
               <div className="grid sm:grid-cols-2 gap-4">
-                {clinic.services.map((service: ClinicService) => (
+                {clinic.services.map((service: Service) => (
                   <div key={service.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:border-[#99E7DB] transition group">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-bold text-gray-900 group-hover:text-[#0D47A1] transition">{service.name}</h3>

@@ -1,5 +1,6 @@
-import { createClient } from "@/lib/supabase/server";
 import { requireUserRole } from "@/lib/auth/get-user-context";
+import { getCheckupsByPatientEmail } from "@/lib/data/checkups";
+import type { CheckupStatus } from "@/lib/types/database";
 import Link from "next/link";
 import Image from "next/image";
 import { brand } from "@/lib/brand";
@@ -10,16 +11,9 @@ import {
 
 export default async function PatientDashboard() {
   const context = await requireUserRole("patient");
-  const supabase = await createClient();
+  const checkups = await getCheckupsByPatientEmail(context.user.email ?? "");
 
-  // Fetch checkups del paziente (usa patient_email come chiave per ora)
-  const { data: checkups } = await supabase
-    .from("checkups")
-    .select("*")
-    .eq("patient_email", context.user.email)
-    .order("created_at", { ascending: false });
-
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: CheckupStatus) => {
     switch(status) {
       case 'new': return <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-bold flex items-center gap-1"><Clock className="w-3 h-3" /> In Attesa</span>;
       case 'contacted': return <span className="px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-xs font-bold flex items-center gap-1"><MessageSquare className="w-3 h-3" /> Contattato</span>;
@@ -80,7 +74,7 @@ export default async function PatientDashboard() {
 
         {/* Lista Richieste */}
         <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
-          {!checkups || checkups.length === 0 ? (
+          {checkups.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <FileText className="w-8 h-8 text-gray-400" />

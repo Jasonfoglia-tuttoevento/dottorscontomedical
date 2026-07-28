@@ -1,9 +1,8 @@
 import { Users, Calendar, TrendingUp, Euro } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
+import { countClinicMatches } from "@/lib/data/matches";
 
 export default async function StatsCards() {
-  const supabase = await createClient();
   const clinicData = await getCurrentClinic();
   
   if (!clinicData?.clinic) {
@@ -22,33 +21,26 @@ export default async function StatsCards() {
 
   const clinicId = clinicData.clinic.id;
 
-  // Lead questo mese
-  const { count: leadsCount } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId)
-    .gte("created_at", new Date(new Date().setDate(1)).toISOString());
-
-  // Appuntamenti confermati
-  const { count: appointmentsCount } = await supabase
-    .from("matches")
-    .select("*", { count: "exact", head: true })
-    .eq("clinic_id", clinicId)
-    .eq("status", "accepted");
+  const [leadsCount, appointmentsCount] = await Promise.all([
+    countClinicMatches(clinicId, {
+      since: new Date(new Date().setDate(1)).toISOString(),
+    }),
+    countClinicMatches(clinicId, { status: "accepted" }),
+  ]);
 
   // Tasso conversione
-  const conversionRate = leadsCount && leadsCount > 0 
-    ? Math.round(((appointmentsCount || 0) / leadsCount) * 100) 
+  const conversionRate = leadsCount > 0
+    ? Math.round((appointmentsCount / leadsCount) * 100)
     : 0;
 
   // Revenue stimata (media €500 per conversione)
-  const estimatedRevenue = (appointmentsCount || 0) * 500;
+  const estimatedRevenue = appointmentsCount * 500;
 
   const stats = [
     {
       icon: Users,
       label: "Lead questo mese",
-      value: leadsCount || 0,
+      value: leadsCount,
       change: "+12%",
       changeType: "positive" as const,
       color: "red",
@@ -56,7 +48,7 @@ export default async function StatsCards() {
     {
       icon: Calendar,
       label: "Appuntamenti confermati",
-      value: appointmentsCount || 0,
+      value: appointmentsCount,
       change: "+5",
       changeType: "positive" as const,
       color: "blue",
