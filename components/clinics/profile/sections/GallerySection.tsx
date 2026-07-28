@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Upload, Image, Trash2, Plus, X } from "lucide-react";
+import { Upload, Image as ImageIcon, X } from "lucide-react";
 
 interface Clinic {
   id: string;
@@ -11,7 +11,6 @@ interface Clinic {
 }
 
 export default function GallerySection({ clinic }: { clinic: Clinic }) {
-  const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState<string | null>(null);
   const [logoUrl, setLogoUrl] = useState(clinic.logo_url || "");
   const [coverUrl, setCoverUrl] = useState(clinic.cover_url || "");
@@ -84,7 +83,7 @@ export default function GallerySection({ clinic }: { clinic: Clinic }) {
               {logoUrl ? (
                 <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
               ) : (
-                <Image className="w-12 h-12 text-gray-300" />
+                <ImageIcon className="w-12 h-12 text-gray-300" />
               )}
             </div>
 
@@ -145,7 +144,7 @@ export default function GallerySection({ clinic }: { clinic: Clinic }) {
                 </>
               ) : (
                 <div className="text-center text-gray-400">
-                  <Image className="w-12 h-12 mx-auto mb-2" />
+                  <ImageIcon className="w-12 h-12 mx-auto mb-2" />
                   <p className="text-sm">Nessuna foto di copertina</p>
                 </div>
               )}

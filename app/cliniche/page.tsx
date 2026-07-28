@@ -6,7 +6,7 @@ import ClinicList from "@/components/clinics/ClinicList";
 import ClinicFilters from "@/components/clinics/ClinicFilters";
 import {
   Search, SlidersHorizontal, ShieldCheck, Star, Clock,
-  TrendingUp, Award, ChevronRight, CheckCircle2
+  TrendingUp, Award, ChevronRight
 } from "lucide-react";
 
 interface SearchParams {

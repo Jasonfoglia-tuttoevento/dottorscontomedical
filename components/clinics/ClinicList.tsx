@@ -55,7 +55,7 @@ export default async function ClinicList({
     }
   }
 
-  const { data: clinics, error } = await query.order("created_at", { ascending: false });
+  const { data: clinics } = await query.order("created_at", { ascending: false });
 
   // Gestione stato vuoto o errore
   if (!clinics || clinics.length === 0) {

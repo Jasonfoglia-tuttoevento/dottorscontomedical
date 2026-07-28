@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Plus, Trash2, Save, Edit3, X, Check, Clock, Euro, FileText } from "lucide-react";
+import { Plus, Trash2, Edit3, X, Check, Clock, Euro, FileText } from "lucide-react";
 
 interface Clinic {
   id: string;

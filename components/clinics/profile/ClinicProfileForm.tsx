@@ -38,7 +38,7 @@ export default async function ClinicProfileForm() {
       <ContactSection clinic={clinicData.clinic} />
 
       {/* Sezione 4: Orari */}
-      <HoursSection clinic={clinicData.clinic} />
+      <HoursSection />
 
       {/* Sezione 5: Galleria Foto */}
       <GallerySection clinic={clinicData.clinic} />

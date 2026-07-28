@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Save, Clock } from "lucide-react";
-
-interface Clinic {
-  id: string;
-}
 
 interface TimeSlot {
   day: string;
@@ -19,7 +14,7 @@ const defaultDays = [
   "Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica"
 ];
 
-export default function HoursSection({ clinic }: { clinic: Clinic }) {
+export default function HoursSection() {
   const [loading, setLoading] = useState(false);
   const [hours, setHours] = useState<TimeSlot[]>(
     defaultDays.map((day) => ({
@@ -29,8 +24,6 @@ export default function HoursSection({ clinic }: { clinic: Clinic }) {
       closed: day === "Domenica",
     }))
   );
-  const supabase = createClient();
-
   const toggleDay = (index: number) => {
     const newHours = [...hours];
     newHours[index].closed = !newHours[index].closed;

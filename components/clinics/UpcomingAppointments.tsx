@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Calendar, Clock, MapPin, ArrowRight } from "lucide-react";
+import { Calendar, MapPin, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentClinic } from "@/lib/supabase/getClinic";
 

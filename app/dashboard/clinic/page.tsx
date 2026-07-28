@@ -5,7 +5,7 @@ import Image from "next/image";
 import { brand } from "@/lib/brand";
 import {
   LayoutDashboard, Users, Calendar, Settings,
-  LogOut, Building2, Bell, Search
+  LogOut, Bell, Search
 } from "lucide-react";
 
 // Importa i TUOI componenti esistenti

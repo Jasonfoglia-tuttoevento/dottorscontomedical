@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CheckCircle2, ArrowRight, Home, Search } from "lucide-react";
+import { CheckCircle2, Home, Search } from "lucide-react";
 import { brand } from "@/lib/brand";
 
 export default function SuccessPage() {

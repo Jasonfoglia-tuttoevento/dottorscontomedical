@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { brand } from "@/lib/brand";
 import {
-  FileText, CheckCircle2, Clock, AlertCircle,
+  FileText, CheckCircle2, Clock,
   MessageSquare, ArrowRight, User, LogOut
 } from "lucide-react";
 
