@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
+import { brand } from "@/lib/brand";
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -15,39 +16,39 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <Image 
-              src="/images/dottorsconto-logo.png" 
-              alt="Dottor Sconto" 
-              width={180}
-              height={48}
-              className="h-12 w-auto"
+              src={brand.logoFull}
+              alt={brand.name}
+              width={1281}
+              height={252}
+              className="h-9 sm:h-12 w-auto max-w-[calc(100vw-6rem)] object-contain"
               priority
             />
           </Link>
 
           {/* Menu Desktop */}
           <div className="hidden lg:flex items-center gap-10">
-            <Link href="/cliniche" className="text-gray-700 hover:text-red-600 font-medium transition">
+            <Link href="/cliniche" className="text-gray-700 hover:text-[#0D47A1] font-medium transition">
               Cliniche
             </Link>
-            <Link href="/specializzazioni" className="text-gray-700 hover:text-red-600 font-medium transition">
+            <Link href="/#specializzazioni" className="text-gray-700 hover:text-[#0D47A1] font-medium transition">
               Specializzazioni
             </Link>
-            <Link href="/come-funziona" className="text-gray-700 hover:text-red-600 font-medium transition">
+            <Link href="/#come-funziona" className="text-gray-700 hover:text-[#0D47A1] font-medium transition">
               Come funziona
             </Link>
-            <Link href="/recensioni" className="text-gray-700 hover:text-red-600 font-medium transition">
+            <Link href="/#recensioni" className="text-gray-700 hover:text-[#0D47A1] font-medium transition">
               Recensioni
             </Link>
           </div>
 
-          {/* CTA Desktop - Solo Pazienti e Cliniche */}
+          {/* CTA Desktop */}
           <div className="hidden lg:flex items-center gap-4">
-            <Link href="/login" className="text-gray-700 hover:text-red-600 font-semibold transition">
+            <Link href="/login" className="text-gray-700 hover:text-[#0D47A1] font-semibold transition">
               Accedi
             </Link>
             <Link 
               href="/check-up" 
-              className="px-6 py-3 bg-red-600 text-white rounded-full font-semibold hover:bg-red-700 transition shadow-lg hover:shadow-xl"
+              className="px-6 py-3 bg-[#0D47A1] text-white rounded-full font-semibold hover:bg-[#0B3B86] transition shadow-lg hover:shadow-xl"
             >
               Check-up Gratuito
             </Link>
@@ -65,16 +66,16 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {mobileOpen && (
-          <div className="lg:hidden py-6 border-t border-gray-100">
-            <div className="flex flex-col gap-4">
-              <Link href="/cliniche" className="text-gray-700 font-medium py-2">Cliniche</Link>
-              <Link href="/specializzazioni" className="text-gray-700 font-medium py-2">Specializzazioni</Link>
-              <Link href="/come-funziona" className="text-gray-700 font-medium py-2">Come funziona</Link>
-              <Link href="/recensioni" className="text-gray-700 font-medium py-2">Recensioni</Link>
+          <div className="lg:hidden py-6 border-t border-gray-100 bg-white absolute left-0 right-0 shadow-xl">
+            <div className="flex flex-col gap-4 px-6">
+              <Link href="/cliniche" className="text-gray-700 font-medium py-2 border-b border-gray-50">Cliniche</Link>
+              <Link href="/#specializzazioni" className="text-gray-700 font-medium py-2 border-b border-gray-50">Specializzazioni</Link>
+              <Link href="/#come-funziona" className="text-gray-700 font-medium py-2 border-b border-gray-50">Come funziona</Link>
+              <Link href="/#recensioni" className="text-gray-700 font-medium py-2 border-b border-gray-50">Recensioni</Link>
               <Link href="/login" className="text-gray-700 font-semibold py-2">Accedi</Link>
               <Link 
                 href="/check-up" 
-                className="px-6 py-3 bg-red-600 text-white rounded-full font-semibold text-center"
+                className="mt-2 px-6 py-3 bg-[#0D47A1] text-white rounded-full font-semibold text-center shadow-md"
               >
                 Check-up Gratuito
               </Link>

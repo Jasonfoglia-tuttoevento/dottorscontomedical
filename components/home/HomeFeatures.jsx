@@ -3,23 +3,23 @@ import { Shield, Award, Clock, Heart } from "lucide-react";
 const features = [
   {
     icon: Shield,
-    title: "Cliniche Verificate",
-    description: "Ogni struttura è controllata manualmente dal nostro team per garantire qualità e professionalità"
+    title: "Ricerca accessibile",
+    description: "Consulta strutture e servizi attraverso un percorso semplice e ordinato"
   },
   {
     icon: Award,
-    title: "Migliori Prezzi",
-    description: "Confrontiamo i preventivi per offrirti sempre le soluzioni più convenienti"
+    title: "Opzioni confrontabili",
+    description: "Raccogli le informazioni disponibili e confronta i preventivi con maggiore chiarezza"
   },
   {
     icon: Clock,
-    title: "Risposta Rapida",
-    description: "Ricevi le tue proposte di cliniche entro 24 ore dalla richiesta"
+    title: "Richiesta guidata",
+    description: "Invia le informazioni necessarie con un check-up digitale in pochi passaggi"
   },
   {
     icon: Heart,
     title: "Assistenza Dedicata",
-    description: "Ti accompagniamo in ogni step, dalla scelta della clinica fino al trattamento"
+    description: "Facilitiamo il contatto tra te e le strutture durante la ricerca"
   }
 ];
 
@@ -30,17 +30,17 @@ export default function HomeFeatures() {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-6 text-secondary-dark">
-              Perché scegliere <span className="text-primary">Dottor Sconto Medical</span>
+              Perché scegliere <span className="text-primary">Facile Medical</span>
             </h2>
             <p className="text-secondary mb-8">
-              Siamo il primo hub italiano che mette in contatto diretto pazienti e cliniche 
-              specializzate, garantendo trasparenza, qualità e risparmio.
+              Mettiamo in contatto pazienti e strutture sanitarie per semplificare
+              ricerca, richieste di preventivo e confronto delle opzioni.
             </p>
             
             <div className="space-y-6">
               {features.map((feature, index) => (
                 <div key={index} className="flex gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 rounded-xl bg-[#CCF3EC] flex items-center justify-center flex-shrink-0">
                     <feature.icon className="w-6 h-6 text-primary" />
                   </div>
                   <div>
@@ -57,11 +57,11 @@ export default function HomeFeatures() {
           </div>
 
           <div className="relative">
-            <div className="aspect-square rounded-3xl bg-gradient-to-br from-red-100 to-gray-100 p-8">
+            <div className="aspect-square rounded-3xl bg-gradient-to-br from-[#CCF3EC] to-gray-100 p-8">
               <div className="w-full h-full rounded-2xl bg-white shadow-2xl flex items-center justify-center">
                 <div className="text-center p-8">
-                  <div className="text-6xl font-bold text-primary mb-2">4.9</div>
-                  <div className="text-secondary mb-4">Valutazione media pazienti</div>
+                  <div className="text-5xl font-bold text-primary mb-2">Facile</div>
+                  <div className="text-secondary mb-4">Un percorso digitale chiaro</div>
                   <div className="flex justify-center gap-1 mb-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <svg key={star} className="w-6 h-6 text-yellow-400 fill-current" viewBox="0 0 20 20">
@@ -69,7 +69,7 @@ export default function HomeFeatures() {
                       </svg>
                     ))}
                   </div>
-                  <div className="text-sm text-secondary">Basato su 1000+ recensioni</div>
+                  <div className="text-sm text-secondary">Semplice · Affidabile · Vicino · Conveniente</div>
                 </div>
               </div>
             </div>

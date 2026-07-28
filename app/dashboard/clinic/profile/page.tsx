@@ -1,5 +1,5 @@
-import ClinicProfileForm from "@/components/dashboard/clinic/profile/ClinicProfileForm";
-import ClinicProfileSidebar from "@/components/dashboard/clinic/profile/ClinicProfileSidebar";
+import ClinicProfileForm from "@/components/clinics/profile/ClinicProfileForm";
+import ClinicProfileSidebar from "@/components/clinics/profile/ClinicProfileSidebar";
 
 export default function ClinicProfilePage() {
   return (

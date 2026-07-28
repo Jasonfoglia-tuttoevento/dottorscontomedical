@@ -1,4 +1,4 @@
-import ClinicSidebar from "@/components/dashboard/clinic/ClinicSidebar";
+import ClinicSidebar from "@/components/clinics/ClinicSidebar";
 import DashboardHeader from "@/components/dashboard/shared/DashboardHeader";
 
 export default function ClinicDashboardLayout({

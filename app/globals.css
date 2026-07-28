@@ -1,19 +1,19 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #dc2626;
-  --color-primary-dark: #b91c1c;
-  --color-primary-light: #ef4444;
-  --color-secondary: #6b7280;
-  --color-secondary-dark: #374151;
-  --color-secondary-light: #9ca3af;
-  --color-accent: #dc2626;
+  --color-primary: #0d47a1;
+  --color-primary-dark: #0b1d3a;
+  --color-primary-light: #00b39a;
+  --color-secondary: #526173;
+  --color-secondary-dark: #0b1d3a;
+  --color-secondary-light: #7b8794;
+  --color-accent: #00b39a;
   --color-background: #ffffff;
-  --color-foreground: #111827;
-  --color-muted: #f9fafb;
+  --color-foreground: #0b1d3a;
+  --color-muted: #f2f4f7;
   --color-muted-foreground: #6b7280;
   --color-border: #e5e7eb;
-  --color-ring: #dc2626;
+  --color-ring: #00b39a;
 }
 
 * {
@@ -32,7 +32,7 @@ body {
 }
 
 .bg-gradient-hero {
-  background: linear-gradient(to bottom right, #fef2f2, #ffffff, #f9fafb);
+  background: linear-gradient(to bottom right, #e6faf5, #ffffff, #f2f4f7);
 }
 
 /* Bottoni */
@@ -62,7 +62,7 @@ body {
 }
 
 .btn-secondary:hover {
-  background-color: #fef2f2;
+  background-color: #e6faf5;
 }
 
 .btn-accent {
@@ -185,11 +185,11 @@ input:focus, textarea:focus, select:focus {
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  background-color: #fee2e2;
+  background-color: #e6faf5;
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-weight: 500;
-  color: #b91c1c;
+  color: #0d47a1;
 }
 
 /* Grid patterns */

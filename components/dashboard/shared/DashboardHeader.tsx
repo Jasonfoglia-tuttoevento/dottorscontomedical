@@ -12,23 +12,23 @@ export default function DashboardHeader() {
             <input
               type="text"
               placeholder="Cerca..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
             />
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="p-2 text-gray-600 hover:text-red-600 transition">
+          <button className="p-2 text-gray-600 hover:text-[#0D47A1] transition">
             <HelpCircle className="w-5 h-5" />
           </button>
           
-          <button className="relative p-2 text-gray-600 hover:text-red-600 transition">
+          <button className="relative p-2 text-gray-600 hover:text-[#0D47A1] transition">
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-600 rounded-full"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-[#0D47A1] rounded-full"></span>
           </button>
 
           <div className="flex items-center gap-3 pl-4 border-l border-gray-200">
-            <div className="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white font-bold">
+            <div className="w-10 h-10 rounded-full bg-[#0D47A1] flex items-center justify-center text-white font-bold">
               CL
             </div>
             <div>

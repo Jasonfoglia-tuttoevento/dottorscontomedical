@@ -1,6 +1,8 @@
 import Navbar from "@/components/Layout/Navbar";
 import HomeHero from "@/components/home/HomeHero";
 import HomeCategories from "@/components/home/HomeCategories";
+import HomeHowItWorks from "@/components/home/HomeHowItWorks";
+import HomeTestimonials from "@/components/home/HomeTestimonials";
 import Footer from "@/components/Layout/Footer";
 
 export default function Home() {
@@ -9,6 +11,8 @@ export default function Home() {
       <Navbar />
       <HomeHero />
       <HomeCategories />
+      <HomeHowItWorks />
+      <HomeTestimonials />
       <Footer />
     </main>
   );

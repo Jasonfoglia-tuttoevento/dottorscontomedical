@@ -1,5 +1,6 @@
 {
-  "name": "dottorscontomedical",
+  "name": "facilemedical",
+  "description": "Facile Medical semplifica l'accesso a visite, esami, check-up e strutture sanitarie.",
   "version": "0.1.0",
   "private": true,
   "scripts": {

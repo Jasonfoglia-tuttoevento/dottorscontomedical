@@ -1,6 +1,6 @@
-import LeadTable from "@/components/dashboard/clinic/leads/LeadTable";
-import LeadFilters from "@/components/dashboard/clinic/leads/LeadFilters";
-import LeadStats from "@/components/dashboard/clinic/leads/LeadStats";
+import LeadTable from "@/components/clinics/leads/LeadTable";
+import LeadFilters from "@/components/clinics/leads/LeadFilters";
+import LeadStats from "@/components/clinics/leads/LeadStats";
 
 export default function LeadsPage() {
   return (

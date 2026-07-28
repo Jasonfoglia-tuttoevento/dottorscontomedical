@@ -3,7 +3,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 
 export default function HomeCTA() {
   return (
-    <section className="section-padding bg-gradient-to-br from-primary to-red-700 relative overflow-hidden">
+    <section className="section-padding bg-gradient-to-br from-primary to-[#0B3B86] relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full translate-x-1/3 translate-y-1/3"></div>
@@ -16,12 +16,12 @@ export default function HomeCTA() {
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">
-            Pronto a risparmiare sulla tua salute?
+            Pronto a semplificare il tuo percorso?
           </h2>
           
           <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Inizia ora il tuo check-up gratuito e ricevi fino a 3 proposte 
-            di cliniche verificate nella tua zona.
+            Inizia il check-up gratuito, descrivi la tua esigenza e confronta
+            le opzioni proposte dalle strutture disponibili.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -47,11 +47,11 @@ export default function HomeCTA() {
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              Risposta in 24 ore
+              Richiesta semplice e guidata
             </div>
             <div className="flex items-center gap-2">
               <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-              Cliniche verificate
+              Confronto delle opzioni
             </div>
           </div>
         </div>

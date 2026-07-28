@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { brand } from "@/lib/brand";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,10 +9,10 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="w-full py-4 px-6">
         <Link href="/" className="inline-block">
           <Image
-            src="/images/dottorsconto-logo.png"
-            alt="Dottor Sconto"
-            width={160}
-            height={44}
+            src={brand.logoFull}
+            alt={brand.name}
+            width={1281}
+            height={252}
             className="h-10 w-auto"
             priority
           />
@@ -29,14 +30,14 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Footer card */}
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500">
-              © 2026 Dottor Sconto Medical. Tutti i diritti riservati.
+              © 2026 {brand.name}. Tutti i diritti riservati.
             </p>
           </div>
         </div>
       </main>
 
       {/* Decorazione mobile: gradiente sottile in basso */}
-      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-red-50 to-transparent pointer-events-none md:hidden"></div>
+      <div className="fixed bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#E6FAF5] to-transparent pointer-events-none md:hidden"></div>
     </div>
   );
 }

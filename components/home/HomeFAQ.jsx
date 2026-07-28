@@ -1,29 +1,29 @@
 import { ChevronDown } from "lucide-react";
 
 const faqs = [
-  { 
-    q: "Il check-up è davvero gratuito?", 
-    a: "Sì, il check-up iniziale è completamente gratuito e senza impegno. Riceverai una diagnosi chiara e le migliori proposte di cliniche verificate." 
+  {
+    q: "Il check-up è davvero gratuito?",
+    a: "Sì, il check-up iniziale è gratuito e senza impegno. Serve a raccogliere le informazioni utili per inoltrare la tua richiesta alle strutture disponibili; non sostituisce una diagnosi medica."
   },
-  { 
-    q: "Come vengono selezionate le cliniche?", 
-    a: "Ogni clinica viene verificata manualmente dal nostro team: controlliamo credenziali, specializzazioni, recensioni e standard qualitativi." 
+  {
+    q: "Come vengono selezionate le cliniche?",
+    a: "Puoi consultare le informazioni pubblicate dalle strutture e confrontare servizi, sede e contatti prima di scegliere come procedere."
   },
-  { 
-    q: "Devo pagare qualcosa in più?", 
-    a: "No, il nostro servizio è gratuito per i pazienti. Le cliniche partner ci riconoscono una fee solo se decidi di prenotare." 
+  {
+    q: "Devo pagare qualcosa in più?",
+    a: "No, il nostro servizio è gratuito per i pazienti. Le cliniche partner ci riconoscono una fee solo se decidi di prenotare."
   },
-  { 
-    q: "Posso parlare direttamente con la clinica?", 
-    a: "Sì, dopo il matching puoi chattare direttamente con la clinica tramite la piattaforma per chiarire ogni dubbio." 
+  {
+    q: "Posso parlare direttamente con la clinica?",
+    a: "Sì, dopo il matching puoi chattare direttamente con la clinica tramite la piattaforma per chiarire ogni dubbio."
   },
-  { 
-    q: "In quanto tempo ricevo le proposte?", 
-    a: "Entro 24 ore dalla richiesta riceverai fino a 3 proposte di cliniche verificate nella tua zona." 
+  {
+    q: "In quanto tempo ricevo le proposte?",
+    a: "I tempi dipendono dalla disponibilità delle strutture. Potrai controllare lo stato della richiesta dalla tua area personale."
   },
-  { 
-    q: "Che specializzazioni coprite?", 
-    a: "Attivamente copriamo tre macro-aree: dentali (implantologia, ortodonzia, igiene), capelli (trapianti, tricologia) ed estetica (medicina estetica, dermatologia)." 
+  {
+    q: "Che specializzazioni coprite?",
+    a: "Attivamente copriamo tre macro-aree: dentali (implantologia, ortodonzia, igiene), capelli (trapianti, tricologia) ed estetica (medicina estetica, dermatologia)."
   }
 ];
 

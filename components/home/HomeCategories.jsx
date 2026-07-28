@@ -9,7 +9,7 @@ const categories = [
     slug: "dentali",
     clinics: 24,
     image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=800&q=80",
-    gradient: "from-red-600 to-red-800"
+    gradient: "from-[#0D47A1] to-[#0B1D3A]"
   },
   {
     icon: Scissors,
@@ -17,7 +17,8 @@ const categories = [
     description: "Trapianti, cura della calvizie, trattamenti tricologici avanzati",
     slug: "capelli",
     clinics: 18,
-    image: "https://images.unsplash.com/photo-1585232004423-244e0e6904e3?w=800&q=80",
+    // ✅ IMMAGINE CORRETTA: Trattamento capelli / Cuoio capelluto
+    image: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?w=800&q=80",
     gradient: "from-gray-700 to-gray-900"
   },
   {
@@ -27,28 +28,28 @@ const categories = [
     slug: "estetica",
     clinics: 15,
     image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=800&q=80",
-    gradient: "from-red-600 to-gray-800"
+    gradient: "from-[#0D47A1] to-gray-800"
   }
 ];
 
 export default function HomeCategories() {
   return (
-    <section className="py-24 bg-white">
+    <section id="specializzazioni" className="py-24 bg-white scroll-mt-20">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-red-50 rounded-full px-4 py-2 mb-6">
-            <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-            <span className="text-red-600 text-sm font-semibold uppercase tracking-wide">
+          <div className="inline-flex items-center gap-2 bg-[#E6FAF5] rounded-full px-4 py-2 mb-6">
+            <span className="w-2 h-2 bg-[#0D47A1] rounded-full"></span>
+            <span className="text-[#0D47A1] text-sm font-semibold uppercase tracking-wide">
               Specializzazioni
             </span>
           </div>
           <h2 className="text-4xl md:text-6xl font-black text-gray-900 mb-6 tracking-tight">
             Scegli la tua area<br />
-            di <span className="text-red-600">interesse</span>
+            di <span className="text-[#0D47A1]">interesse</span>
           </h2>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Tre macro-categorie, centinaia di cliniche verificate, un unico obiettivo: la tua salute.
+            Esplora le aree disponibili e trova le strutture adatte alle tue esigenze.
           </p>
         </div>
 

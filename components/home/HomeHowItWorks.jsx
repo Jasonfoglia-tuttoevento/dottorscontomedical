@@ -11,13 +11,13 @@ const steps = [
     icon: Search,
     step: "02",
     title: "Analisi del Caso",
-    description: "Il nostro team analizza la tua richiesta e identifica le soluzioni migliori"
+    description: "La richiesta viene organizzata per facilitare il contatto con le strutture disponibili"
   },
   {
     icon: Users,
     step: "03",
     title: "Matching Cliniche",
-    description: "Ricevi 3 proposte di cliniche verificate e confronta i preventivi"
+    description: "Consulta le opzioni ricevute e confronta le informazioni disponibili"
   },
   {
     icon: Calendar,
@@ -29,7 +29,7 @@ const steps = [
 
 export default function HomeHowItWorks() {
   return (
-    <section className="section-padding bg-gray-50">
+    <section id="come-funziona" className="section-padding bg-gray-50 scroll-mt-20">
       <div className="container-custom">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-secondary-dark">
