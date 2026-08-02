@@ -7,7 +7,7 @@ import { BarChart3, Building2, LayoutDashboard, Sparkles, Users } from "lucide-r
 const clinicNavigation = [
   { label: "Panoramica", href: "/dashboard/clinic", icon: LayoutDashboard },
   { label: "Lead", href: "/dashboard/clinic/leads", icon: Users },
-  { label: "Performance", href: "/dashboard/clinic/performance", icon: BarChart3 },
+  { label: "Analitiche", href: "/dashboard/clinic/performance", icon: BarChart3 },
   { label: "Profilo", href: "/dashboard/clinic/profile", icon: Building2 },
   { label: "Piani", href: "/dashboard/clinic/plans", icon: Sparkles },
 ] as const;

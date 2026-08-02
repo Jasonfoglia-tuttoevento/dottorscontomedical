@@ -10,7 +10,7 @@ function pageCopy(pathname: string) {
     return { eyebrow: "Acquisizione pazienti", title: "Gestione lead", description: "Valuta le richieste assegnate alla clinica." };
   }
   if (pathname.startsWith("/dashboard/clinic/performance")) {
-    return { eyebrow: "Dati operativi", title: "Performance", description: "Analizza richieste, risposte e conversioni." };
+    return { eyebrow: "Dati e crescita", title: "Analitiche", description: "Misura visualizzazioni, click, richieste e conversioni." };
   }
   if (pathname.startsWith("/dashboard/clinic/profile")) {
     return { eyebrow: "Presenza pubblica", title: "Profilo clinica", description: "Aggiorna una sezione alla volta, senza pagine infinite." };
@@ -30,7 +30,7 @@ export default function DashboardHeader() {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
         <div className="flex min-w-0 items-center gap-4">
           <Link href="/" className="hidden shrink-0 rounded-xl sm:inline-flex" aria-label="FACILE MEDICAL">
-            <BrandLogo iconClassName="h-8 w-8" textClassName="text-sm" />
+            <BrandLogo iconClassName="h-10 w-10" textClassName="text-base" />
           </Link>
           <div className="min-w-0 sm:border-l sm:border-slate-200 sm:pl-4">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#0D47A1] sm:text-xs">{copy.eyebrow}</p>

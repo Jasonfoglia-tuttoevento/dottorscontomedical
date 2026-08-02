@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CheckCircle2, Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
+import ClinicAnalyticsTracker from "@/components/analytics/ClinicAnalyticsTracker";
 import BrandLogo from "@/components/brand/BrandLogo";
 import ClinicServicesList from "@/components/marketplace/ClinicServicesList";
 import { brand } from "@/lib/brand";
@@ -93,6 +94,7 @@ export default async function ClinicDetailPage({ params }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F2F4F7] pb-20">
+      <ClinicAnalyticsTracker clinicId={clinic.id} />
       <header className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A]">
@@ -166,9 +168,9 @@ export default async function ClinicDetailPage({ params }: Props) {
                 <h2 className="text-xl font-black text-[#0B1D3A]">Contatti</h2>
                 <div className="mt-5 space-y-4 text-sm">
                   {location && <p className="flex items-start gap-3 break-words text-gray-600"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{location}</span></p>}
-                  {clinic.phone && <a href={`tel:${clinic.phone}`} className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.phone}</span></a>}
-                  {clinic.email && <a href={`mailto:${clinic.email}`} className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.email}</span></a>}
-                  {websiteUrl && <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>Visita il sito della struttura</span></a>}
+                  {clinic.phone && <a href={`tel:${clinic.phone}`} data-clinic-event="phone_click" className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.phone}</span></a>}
+                  {clinic.email && <a href={`mailto:${clinic.email}`} data-clinic-event="email_click" className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.email}</span></a>}
+                  {websiteUrl && <a href={websiteUrl} target="_blank" rel="noopener noreferrer" data-clinic-event="website_click" className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>Visita il sito della struttura</span></a>}
                 </div>
               </section>
             )}
@@ -178,7 +180,7 @@ export default async function ClinicDetailPage({ params }: Props) {
               <p className="mt-3 text-sm leading-relaxed text-blue-100">
                 Invia una richiesta generale a Facile Medical indicando le tue esigenze.
               </p>
-              <Link href="/check-up" className="mt-6 block rounded-xl bg-white px-5 py-3 text-center font-bold text-[#0D47A1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D47A1]">
+              <Link href="/check-up" data-clinic-event="request_click" className="mt-6 block rounded-xl bg-white px-5 py-3 text-center font-bold text-[#0D47A1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D47A1]">
                 Inizia la richiesta
               </Link>
             </section>

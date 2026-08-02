@@ -15,7 +15,7 @@ export default function Navbar() {
           <Link href="/" aria-label="Facile Medical" className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00A98F]">
             <BrandLogo
               className="gap-1.5"
-              iconClassName="h-7 w-7 sm:h-8 sm:w-8"
+              iconClassName="h-9 w-9 sm:h-10 sm:w-10"
               textClassName="text-lg sm:text-xl"
               priority
             />
