@@ -46,7 +46,8 @@ require("app/dashboard/patient/requests/page.tsx", "PAGE_SIZE = 8", "Archivio pa
 require("app/dashboard/clinic/profile/page.tsx", 'redirect("/dashboard/clinic/profile/general")', "Profilo clinica apre la prima sezione")
 
 # Pricing is centralized and transparent.
-require("lib/billing/plans.ts", 'monthlyPrice: 99', "Prezzo Plus centralizzato")
+require("lib/billing/plans.ts", 'monthlyPrice: 499', "Prezzo Plus centralizzato")
+require("lib/billing/plans.ts", "annualPrice: 4990", "Prezzo annuale Plus centralizzato")
 require("lib/billing/plans.ts", 'monthlyPrice: 0', "Piano Free centralizzato")
 require("lib/billing/plans.ts", "non sono ancora attivi addebiti automatici", "Disclaimer beta presente")
 require("components/billing/PlanComparison.tsx", "PlanCard", "Confronto piani modulare")
