@@ -1,153 +1,147 @@
-import Link from "next/link";
-import { Eye, MessageSquare, Check, X, Clock, MapPin } from "lucide-react";
-import { getCurrentClinic } from "@/lib/supabase/getClinic";
-import { getClinicMatches } from "@/lib/data/matches";
+import { CheckCircle2, Clock3, LockKeyhole, Mail, MapPin, Phone, XCircle } from "lucide-react";
 import AcceptLeadButton from "./AcceptLeadButton";
 import RejectLeadButton from "./RejectLeadButton";
+import type { MatchWithCheckup } from "@/lib/types/database";
 
-export default async function LeadTable() {
-  const clinicData = await getCurrentClinic();
+interface LeadTableProps {
+  matches: MatchWithCheckup[];
+}
 
-  if (!clinicData?.clinic) {
+const statusConfig = {
+  pending: { label: "Da gestire", icon: Clock3, className: "bg-amber-50 text-amber-700" },
+  accepted: { label: "Accettato", icon: CheckCircle2, className: "bg-emerald-50 text-emerald-700" },
+  rejected: { label: "Rifiutato", icon: XCircle, className: "bg-gray-100 text-gray-600" },
+} as const;
+
+function StatusBadge({ status }: { status: MatchWithCheckup["status"] }) {
+  const config = statusConfig[status];
+
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold ${config.className}`}>
+      <config.icon className="h-3.5 w-3.5" />
+      {config.label}
+    </span>
+  );
+}
+
+function LeadActions({ match }: { match: MatchWithCheckup }) {
+  if (match.status === "pending") {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-        <div className="text-gray-400 mb-2">Nessuna clinica trovata</div>
+      <div className="flex items-center justify-end gap-1 rounded-lg border border-gray-200 bg-white">
+        <AcceptLeadButton matchId={match.id} />
+        <span className="h-5 w-px bg-gray-200" />
+        <RejectLeadButton matchId={match.id} />
       </div>
     );
   }
 
-  const matches = await getClinicMatches(clinicData.clinic.id);
+  return <span className="text-xs font-semibold text-gray-400">Decisione registrata</span>;
+}
 
-  if (matches.length === 0) {
+function ContactDetails({ match }: { match: MatchWithCheckup }) {
+  const checkup = match.checkups;
+
+  if (match.status !== "accepted") {
     return (
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-12 text-center">
-        <div className="text-gray-400 mb-2">Nessun lead ricevuto</div>
-        <div className="text-sm text-gray-500">
-          I lead appariranno qui quando i pazienti ti invieranno richieste
-        </div>
-      </div>
+      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-400">
+        <LockKeyhole className="h-3.5 w-3.5" /> Contatti dopo l’accettazione
+      </span>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="flex flex-wrap gap-2">
+      {checkup?.patient_phone && (
+        <a href={`tel:${checkup.patient_phone}`} className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100">
+          <Phone className="h-3.5 w-3.5" /> Chiama
+        </a>
+      )}
+      {checkup?.patient_email && (
+        <a href={`mailto:${checkup.patient_email}`} className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1.5 text-xs font-bold text-blue-700 hover:bg-blue-100">
+          <Mail className="h-3.5 w-3.5" /> Email
+        </a>
+      )}
+      {!checkup?.patient_phone && !checkup?.patient_email && <span className="text-xs text-gray-400">Contatto non disponibile</span>}
+    </div>
+  );
+}
+
+export default function LeadTable({ matches }: LeadTableProps) {
+  if (matches.length === 0) {
+    return (
+      <section className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center shadow-sm">
+        <p className="font-black text-gray-800">Nessun lead corrisponde ai filtri</p>
+        <p className="mt-2 text-sm text-gray-500">Modifica i criteri di ricerca oppure attendi nuove richieste.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="border-b border-gray-200 bg-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Paziente
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Trattamento
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Città
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Data
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Stato
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-                Azioni
-              </th>
+              <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600">Paziente e richiesta</th>
+              <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600">Città</th>
+              <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600">Data</th>
+              <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600">Stato</th>
+              <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider text-gray-600">Contatti</th>
+              <th className="px-5 py-4 text-right text-xs font-bold uppercase tracking-wider text-gray-600">Azioni</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
+          <tbody className="divide-y divide-gray-100">
             {matches.map((match) => {
               const checkup = match.checkups;
+
               return (
-                <tr key={match.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="font-semibold text-gray-900">
-                        {checkup?.patient_name || "Anonimo"}
-                      </div>
-                      {checkup?.patient_email && (
-                        <div className="text-sm text-gray-500">{checkup.patient_email}</div>
-                      )}
-                    </div>
+                <tr key={match.id} className="transition hover:bg-gray-50">
+                  <td className="px-5 py-4">
+                    <p className="font-bold text-gray-950">{checkup?.patient_name || "Paziente"}</p>
+                    <p className="mt-1 max-w-xs text-sm text-gray-600">{checkup?.treatment || checkup?.category || "Richiesta odontoiatrica"}</p>
                   </td>
-                  <td className="px-6 py-4">
-                    <div>
-                      <div className="font-medium text-gray-900">{checkup?.category}</div>
-                      <div className="text-sm text-gray-500 line-clamp-1">{checkup?.treatment}</div>
-                    </div>
+                  <td className="px-5 py-4 text-sm text-gray-700">
+                    {checkup?.city ? <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4 text-gray-400" />{checkup.city}</span> : "—"}
                   </td>
-                  <td className="px-6 py-4">
-                    {checkup?.city ? (
-                      <div className="flex items-center gap-1 text-gray-700">
-                        <MapPin className="w-4 h-4 text-gray-400" />
-                        {checkup.city}
-                      </div>
-                    ) : (
-                      <span className="text-gray-400">-</span>
-                    )}
+                  <td className="px-5 py-4">
+                    <p className="text-sm font-semibold text-gray-700">{new Date(match.created_at).toLocaleDateString("it-IT")}</p>
+                    <p className="mt-0.5 text-xs text-gray-400">{new Date(match.created_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}</p>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-700">
-                      {new Date(match.created_at).toLocaleDateString("it-IT")}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {new Date(match.created_at).toLocaleTimeString("it-IT", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                        match.status === "pending"
-                          ? "bg-[#CCF3EC] text-[#0B3B86]"
-                          : match.status === "accepted"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-700"
-                      }`}
-                    >
-                      {match.status === "pending" && <Clock className="w-3 h-3" />}
-                      {match.status === "accepted" && <Check className="w-3 h-3" />}
-                      {match.status === "rejected" && <X className="w-3 h-3" />}
-                      {match.status === "pending"
-                        ? "Nuovo"
-                        : match.status === "accepted"
-                        ? "Accettato"
-                        : "Rifiutato"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center justify-end gap-2">
-                      {match.status === "pending" ? (
-                        <>
-                          <AcceptLeadButton matchId={match.id} />
-                          <RejectLeadButton matchId={match.id} />
-                        </>
-                      ) : (
-                        <Link
-                          href={`/dashboard/clinic/messages?checkup=${checkup?.id}`}
-                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                          title="Invia messaggio"
-                        >
-                          <MessageSquare className="w-5 h-5" />
-                        </Link>
-                      )}
-                      <Link
-                        href={`/dashboard/clinic/leads/${match.id}`}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
-                        title="Vedi dettagli"
-                      >
-                        <Eye className="w-5 h-5" />
-                      </Link>
-                    </div>
-                  </td>
+                  <td className="px-5 py-4"><StatusBadge status={match.status} /></td>
+                  <td className="px-5 py-4"><ContactDetails match={match} /></td>
+                  <td className="px-5 py-4"><LeadActions match={match} /></td>
                 </tr>
               );
             })}
           </tbody>
         </table>
       </div>
-    </div>
+
+      <div className="divide-y divide-gray-100 md:hidden">
+        {matches.map((match) => {
+          const checkup = match.checkups;
+
+          return (
+            <article key={match.id} className="p-5">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="truncate font-black text-gray-950">{checkup?.patient_name || "Paziente"}</p>
+                  <p className="mt-1 text-sm text-gray-600">{checkup?.treatment || checkup?.category || "Richiesta odontoiatrica"}</p>
+                </div>
+                <StatusBadge status={match.status} />
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3 text-xs text-gray-500">
+                {checkup?.city && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{checkup.city}</span>}
+                <span>{new Date(match.created_at).toLocaleDateString("it-IT")}</span>
+              </div>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4">
+                <ContactDetails match={match} />
+                <LeadActions match={match} />
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }

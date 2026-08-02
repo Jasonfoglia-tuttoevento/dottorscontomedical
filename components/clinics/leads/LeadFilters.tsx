@@ -1,129 +1,69 @@
-"use client";
+import Link from "next/link";
+import { Filter, Search, X } from "lucide-react";
 
-import { useState } from "react";
-import { Search, Filter, X } from "lucide-react";
+export interface LeadFilterValues {
+  q: string;
+  status: string;
+  from: string;
+  to: string;
+}
 
-export default function LeadFilters() {
-  const [filters, setFilters] = useState({
-    search: "",
-    status: "all",
-    category: "all",
-    dateFrom: "",
-    dateTo: "",
-  });
-
-  const [showFilters, setShowFilters] = useState(false);
-
-  const clearFilters = () => {
-    setFilters({
-      search: "",
-      status: "all",
-      category: "all",
-      dateFrom: "",
-      dateTo: "",
-    });
-  };
+export default function LeadFilters({ values }: { values: LeadFilterValues }) {
+  const hasFilters = Boolean(values.q || values.status || values.from || values.to);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between gap-4">
-          {/* Search */}
-          <div className="flex-1 max-w-md">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Cerca per nome paziente o trattamento..."
-                value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-              />
-            </div>
-          </div>
-
-          {/* Toggle Filters */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition ${
-              showFilters ? "bg-[#0D47A1] text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }`}
-          >
-            <Filter className="w-5 h-5" />
-            Filtri
-          </button>
-        </div>
+    <form action="/dashboard/clinic/leads" method="get" className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="flex items-center gap-2 text-sm font-black text-gray-950">
+        <Filter className="h-4 w-4 text-[#0D47A1]" />
+        Filtra i lead
       </div>
 
-      {/* Advanced Filters */}
-      {showFilters && (
-        <div className="p-4 border-b border-gray-200 bg-gray-50">
-          <div className="grid md:grid-cols-4 gap-4">
-            {/* Status */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Stato</label>
-              <select
-                value={filters.status}
-                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-              >
-                <option value="all">Tutti gli stati</option>
-                <option value="pending">Nuovi</option>
-                <option value="accepted">Accettati</option>
-                <option value="rejected">Rifiutati</option>
-              </select>
-            </div>
+      <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(240px,1.4fr)_minmax(170px,0.6fr)_minmax(150px,0.5fr)_minmax(150px,0.5fr)_auto] lg:items-end">
+        <label className="block">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Ricerca</span>
+          <span className="relative block">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="search"
+              name="q"
+              defaultValue={values.q}
+              placeholder="Nome, città o trattamento"
+              className="w-full rounded-xl border border-gray-200 py-2.5 pl-10 pr-3 text-sm outline-none transition focus:border-[#0D47A1] focus:ring-2 focus:ring-blue-100"
+            />
+          </span>
+        </label>
 
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Categoria</label>
-              <select
-                value={filters.category}
-                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-              >
-                <option value="all">Tutte le categorie</option>
-                <option value="dentali">Dentali</option>
-                <option value="capelli">Capelli</option>
-                <option value="estetica">Estetica</option>
-              </select>
-            </div>
+        <label className="block">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Stato</span>
+          <select name="status" defaultValue={values.status} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#0D47A1] focus:ring-2 focus:ring-blue-100">
+            <option value="">Tutti</option>
+            <option value="pending">Da gestire</option>
+            <option value="accepted">Accettati</option>
+            <option value="rejected">Rifiutati</option>
+          </select>
+        </label>
 
-            {/* Date From */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Dal</label>
-              <input
-                type="date"
-                value={filters.dateFrom}
-                onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-              />
-            </div>
+        <label className="block">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Dal</span>
+          <input type="date" name="from" defaultValue={values.from} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#0D47A1] focus:ring-2 focus:ring-blue-100" />
+        </label>
 
-            {/* Date To */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Al</label>
-              <input
-                type="date"
-                value={filters.dateTo}
-                onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-              />
-            </div>
-          </div>
+        <label className="block">
+          <span className="mb-2 block text-xs font-bold uppercase tracking-wider text-gray-500">Al</span>
+          <input type="date" name="to" defaultValue={values.to} className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none transition focus:border-[#0D47A1] focus:ring-2 focus:ring-blue-100" />
+        </label>
 
-          {/* Clear Filters */}
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={clearFilters}
-              className="flex items-center gap-2 text-sm text-gray-600 hover:text-[#0D47A1] transition"
-            >
-              <X className="w-4 h-4" />
-              Cancella filtri
-            </button>
-          </div>
+        <div className="flex gap-2">
+          <button type="submit" className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[#0D47A1] px-4 py-2.5 text-sm font-bold text-white transition hover:bg-[#0B3B86] lg:flex-none">
+            Applica
+          </button>
+          {hasFilters && (
+            <Link href="/dashboard/clinic/leads" aria-label="Azzera filtri" className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-gray-200 px-3 py-2.5 text-gray-600 transition hover:border-red-200 hover:text-red-600">
+              <X className="h-4 w-4" />
+            </Link>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    </form>
   );
 }

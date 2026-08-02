@@ -13,6 +13,6 @@ export function dashboardPathForRole(role: UserRole): string | null {
     case "clinic":
       return "/dashboard/clinic";
     case "admin":
-      return null;
+      return "/dashboard/admin";
   }
 }

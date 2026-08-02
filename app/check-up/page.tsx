@@ -134,14 +134,12 @@ export default function CheckUpPage() {
                     >
                       <option value="">Seleziona categoria...</option>
                       <option value="dentali">🦷 Dentali</option>
-                      <option value="capelli">♂️ Capelli</option>
-                      <option value="estetica">✨ Estetica</option>
                     </select>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-gray-700 ml-1">Trattamento Specifico</label>
                     <input
-                      type="text" placeholder="Es. Implantologia, Trapianto FUE..."
+                      type="text" placeholder="Es. Implantologia, ortodonzia, faccette..."
                       value={formData.treatment} onChange={(e) => handleChange("treatment", e.target.value)}
                       className="w-full p-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#00B39A]/20 focus:border-[#00B39A] outline-none transition-all font-medium"
                     />

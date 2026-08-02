@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUserContext } from "@/lib/auth/get-user-context";
 import { dashboardPathForRole } from "@/lib/auth/roles";
+import BrandLogo from "@/components/brand/BrandLogo";
 import { brand } from "@/lib/brand";
 
 export default async function AccessRequiredPage() {
@@ -27,14 +27,7 @@ export default async function AccessRequiredPage() {
     <main className="min-h-screen bg-gray-50 px-4 py-12">
       <div className="mx-auto max-w-xl rounded-3xl border border-gray-100 bg-white p-8 text-center shadow-xl md:p-12">
         <Link href="/" className="inline-block">
-          <Image
-            src={brand.logoFull}
-            alt={brand.name}
-            width={1281}
-            height={252}
-            className="mx-auto h-12 w-auto object-contain"
-            priority
-          />
+          <BrandLogo iconClassName="h-11 w-11" textClassName="text-xl sm:text-2xl" priority />
         </Link>
 
         <h1 className="mt-10 text-3xl font-black text-[#0B1D3A]">

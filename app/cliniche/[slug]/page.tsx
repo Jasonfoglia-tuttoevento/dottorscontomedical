@@ -1,9 +1,14 @@
-import { notFound } from "next/navigation";
-import { getPublicClinicBySlug } from "@/lib/data/clinics";
-import type { Service } from "@/lib/types/database";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Phone, Mail, Globe, Clock, CheckCircle2, Star, ArrowLeft, Euro } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowLeft, CheckCircle2, Clock, Globe, Mail, MapPin, Phone } from "lucide-react";
+import BrandLogo from "@/components/brand/BrandLogo";
+import ClinicServicesList from "@/components/marketplace/ClinicServicesList";
+import { brand } from "@/lib/brand";
+import { getPublicClinicByIdentifier } from "@/lib/data/clinics";
+import { safeMarketplaceImageUrl } from "@/lib/marketplace/images";
+import { getClinicDetailIdentifier } from "@/lib/marketplace/clinic-identifier";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -11,213 +16,175 @@ interface Props {
 
 interface OpeningHour {
   day: string;
-  open?: string;
-  close?: string;
-  closed?: boolean;
+  label: string;
+}
+
+function parseOpeningHours(value: unknown): OpeningHour[] {
+  let parsed = value;
+
+  if (typeof value === "string") {
+    try {
+      parsed = JSON.parse(value);
+    } catch {
+      return [];
+    }
+  }
+
+  if (!Array.isArray(parsed)) return [];
+
+  return parsed.flatMap((entry): OpeningHour[] => {
+    if (!entry || typeof entry !== "object") return [];
+    const item = entry as Record<string, unknown>;
+    if (typeof item.day !== "string" || !item.day.trim()) return [];
+    if (item.closed === true) return [{ day: item.day.trim(), label: "Chiuso" }];
+    if (typeof item.open !== "string" || typeof item.close !== "string") return [];
+    if (!item.open.trim() || !item.close.trim()) return [];
+    return [{ day: item.day.trim(), label: `${item.open.trim()} – ${item.close.trim()}` }];
+  });
+}
+
+function safeWebsiteUrl(value: string | null): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const clinic = await getPublicClinicByIdentifier(slug);
+
+  if (!clinic) {
+    return {
+      title: "Struttura non trovata",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonicalIdentifier = getClinicDetailIdentifier(clinic);
+  const description = clinic.description?.trim()
+    || `Informazioni e servizi disponibili presso ${clinic.name} su ${brand.name}.`;
+
+  return {
+    title: clinic.name,
+    description,
+    ...(canonicalIdentifier
+      ? { alternates: { canonical: `/cliniche/${encodeURIComponent(canonicalIdentifier)}` } }
+      : { robots: { index: false, follow: false } }),
+    openGraph: { title: clinic.name, description, type: "website" },
+  };
 }
 
 export default async function ClinicDetailPage({ params }: Props) {
   const { slug } = await params;
-  const clinic = await getPublicClinicBySlug(slug);
+  const clinic = await getPublicClinicByIdentifier(slug);
 
-  if (!clinic) {
-    return notFound();
-  }
+  if (!clinic) notFound();
 
-  // Parsing orari (se salvati come JSON string)
-  let openingHours = [];
-  try {
-    if (typeof clinic.opening_hours === 'string') {
-      openingHours = JSON.parse(clinic.opening_hours);
-    } else if (Array.isArray(clinic.opening_hours)) {
-      openingHours = clinic.opening_hours;
-    }
-  } catch (e) {
-    console.error("Errore parsing orari:", e);
-  }
+  const coverUrl = safeMarketplaceImageUrl(clinic.cover_url);
+  const logoUrl = safeMarketplaceImageUrl(clinic.logo_url);
+  const heroImage = coverUrl ?? logoUrl;
+  const openingHours = parseOpeningHours(clinic.opening_hours);
+  const websiteUrl = safeWebsiteUrl(clinic.website);
+  const location = [clinic.address, clinic.city].filter(Boolean).join(", ");
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-32">
-
-      {/* HEADER IMMAGINE */}
-      <div className="relative h-[400px] w-full bg-gray-900">
-        {clinic.cover_url ? (
-          <Image
-            src={clinic.cover_url}
-            alt={clinic.name}
-            fill
-            className="object-cover opacity-80"
-            priority
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-gray-800 to-gray-900 flex items-center justify-center">
-            <MapPin className="w-20 h-20 text-white/20" />
-          </div>
-        )}
-
-        {/* Overlay Gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
-
-        {/* Breadcrumb & Back */}
-        <div className="absolute top-24 left-6 md:left-12 z-20">
-          <Link href="/cliniche" className="inline-flex items-center gap-2 text-white/80 hover:text-white transition text-sm font-medium bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/10">
-            <ArrowLeft className="w-4 h-4" /> Torna alle cliniche
+    <div className="min-h-screen bg-[#F2F4F7] pb-20">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A]">
+            <BrandLogo iconClassName="h-10 w-10" textClassName="text-lg sm:text-xl" priority />
+          </Link>
+          <Link href="/cliniche" className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-[#0D47A1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A]">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Tutte le cliniche
           </Link>
         </div>
+      </header>
 
-        {/* Info Principali Header */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-20 max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <span className="px-3 py-1 bg-[#0D47A1] text-white text-xs font-bold uppercase tracking-wider rounded-full">
-                  {clinic.category}
-                </span>
-                {clinic.verified && (
-                  <span className="px-3 py-1 bg-green-600/90 text-white text-xs font-bold uppercase tracking-wider rounded-full flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Profilo in evidenza
-                  </span>
-                )}
-              </div>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-2 leading-tight">
-                {clinic.name}
-              </h1>
-              <div className="flex items-center gap-2 text-white/90 text-lg">
-                <MapPin className="w-5 h-5" />
-                <span>{clinic.address}, {clinic.city}</span>
-              </div>
+      <main>
+        <section className="relative min-h-[24rem] overflow-hidden bg-[#0B1D3A]">
+          {heroImage ? (
+            <Image
+              src={heroImage}
+              alt={coverUrl ? `Immagine di ${clinic.name}` : `Logo di ${clinic.name}`}
+              fill
+              sizes="100vw"
+              className={coverUrl ? "object-cover opacity-55" : "object-contain p-20 opacity-80"}
+              priority
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center" role="img" aria-label="Immagine non disponibile">
+              <MapPin className="h-24 w-24 text-white/15" aria-hidden="true" />
             </div>
-
-            {/* Rating Box */}
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 min-w-[140px] text-center">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-                <span className="text-2xl font-black text-white">4.8</span>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B1D3A] via-[#0B1D3A]/35 to-transparent" />
+          <div className="relative mx-auto flex min-h-[24rem] max-w-7xl items-end px-4 py-10 sm:px-6">
+            <div className="max-w-4xl">
+              <div className="flex flex-wrap gap-2">
+                {clinic.category && <span className="rounded-full bg-[#00B39A] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">{clinic.category}</span>}
+                {clinic.verified && <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-xs font-bold text-[#0D47A1]"><CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />Profilo in evidenza</span>}
               </div>
-              <p className="text-white/70 text-xs font-medium">Basato su 120+ recensioni</p>
+              <h1 className="mt-4 text-4xl font-black tracking-tight text-white sm:text-6xl">{clinic.name}</h1>
+              {location && <p className="mt-3 flex items-start gap-2 text-lg text-white/85"><MapPin className="mt-1 h-5 w-5 shrink-0" aria-hidden="true" />{location}</p>}
             </div>
           </div>
-        </div>
-      </div>
+        </section>
 
-      {/* CONTENUTO PRINCIPALE */}
-      <div className="max-w-7xl mx-auto px-6 py-12 grid lg:grid-cols-3 gap-12">
-
-        {/* COLONNA SINISTRA: Dettagli */}
-        <div className="lg:col-span-2 space-y-12">
-
-          {/* Descrizione */}
-          <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Chi siamo</h2>
-            <p className="text-gray-600 leading-relaxed text-lg">
-              {clinic.description || "La nostra clinica offre trattamenti all'avanguardia con un team di specialisti dedicati al tuo benessere."}
-            </p>
-          </section>
-
-          {/* Servizi Offerti */}
-          {clinic.services && clinic.services.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Trattamenti e Prezzi</h2>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {clinic.services.map((service: Service) => (
-                  <div key={service.id} className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm hover:border-[#99E7DB] transition group">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-gray-900 group-hover:text-[#0D47A1] transition">{service.name}</h3>
-                      {service.price && (
-                        <span className="flex items-center gap-1 text-green-700 font-bold bg-green-50 px-2 py-1 rounded-lg text-sm">
-                          <Euro className="w-3.5 h-3.5" /> {service.price}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500 mb-3 line-clamp-2">{service.description}</p>
-                    {service.duration_minutes && (
-                      <div className="flex items-center gap-2 text-xs text-gray-400 font-medium">
-                        <Clock className="w-3.5 h-3.5" /> {service.duration_minutes} min
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Orari di Apertura */}
-          {openingHours.length > 0 && (
-            <section>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Orari di Apertura</h2>
-              <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-                {openingHours.map((day: OpeningHour, idx: number) => (
-                  <div key={idx} className={`flex justify-between p-4 ${idx !== openingHours.length - 1 ? 'border-b border-gray-50' : ''}`}>
-                    <span className={`font-semibold ${day.closed ? 'text-gray-400' : 'text-gray-900'}`}>{day.day}</span>
-                    <span className={day.closed ? 'text-gray-400 text-sm' : 'text-gray-600'}>
-                      {day.closed ? 'Chiuso' : `${day.open} - ${day.close}`}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-
-        {/* COLONNA DESTRA: Contatti & CTA Sticky */}
-        <aside className="lg:col-span-1">
-          <div className="sticky top-28 space-y-6">
-
-            {/* Card Contatti */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-              <h3 className="font-bold text-gray-900 mb-4">Contatta la Clinica</h3>
-              <div className="space-y-4">
-                {clinic.phone && (
-                  <a href={`tel:${clinic.phone}`} className="flex items-center gap-3 text-gray-600 hover:text-[#0D47A1] transition group">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#E6FAF5] transition">
-                      <Phone className="w-5 h-5" />
-                    </div>
-                    <span className="font-medium">{clinic.phone}</span>
-                  </a>
-                )}
-                {clinic.email && (
-                  <a href={`mailto:${clinic.email}`} className="flex items-center gap-3 text-gray-600 hover:text-[#0D47A1] transition group">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#E6FAF5] transition">
-                      <Mail className="w-5 h-5" />
-                    </div>
-                    <span className="font-medium truncate">{clinic.email}</span>
-                  </a>
-                )}
-                {clinic.website && (
-                  <a href={clinic.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-gray-600 hover:text-[#0D47A1] transition group">
-                    <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-[#E6FAF5] transition">
-                      <Globe className="w-5 h-5" />
-                    </div>
-                    <span className="font-medium truncate">Visita sito web</span>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* CTA Preventivo Sticky */}
-            <div className="bg-[#0D47A1] p-6 rounded-2xl shadow-xl shadow-[#0D47A1]/20 text-white text-center">
-              <h3 className="text-xl font-black mb-2">Richiedi Preventivo Gratuito</h3>
-              <p className="text-[#CCF3EC] text-sm mb-6">
-                Compila il form per ricevere fino a 3 preventivi comparabili entro 24h.
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)] lg:py-14">
+          <div className="min-w-0 space-y-10">
+            <section className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-8">
+              <h2 className="text-2xl font-black text-[#0B1D3A]">Informazioni sulla struttura</h2>
+              <p className="mt-4 whitespace-pre-line leading-relaxed text-gray-600">
+                {clinic.description?.trim() || "La struttura non ha ancora pubblicato una descrizione."}
               </p>
+            </section>
 
-              {/* Bottone che apre Modal o porta a /check-up precompilato */}
-              <Link
-                href={`/check-up?clinic=${clinic.slug}`}
-                className="block w-full py-4 bg-white text-[#0D47A1] rounded-xl font-bold text-lg hover:bg-gray-50 transition shadow-lg active:scale-95 transform duration-150"
-              >
-                RICHIEDI ORA
+            <ClinicServicesList services={clinic.services ?? []} />
+
+            {openingHours.length > 0 && (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6 sm:p-8">
+                <h2 className="flex items-center gap-3 text-2xl font-black text-[#0B1D3A]"><Clock className="h-6 w-6 text-[#00B39A]" aria-hidden="true" />Orari</h2>
+                <dl className="mt-5 divide-y divide-gray-100">
+                  {openingHours.map((item, index) => (
+                    <div key={`${item.day}-${index}`} className="flex justify-between gap-5 py-3">
+                      <dt className="font-semibold text-gray-800">{item.day}</dt>
+                      <dd className="text-right text-gray-600">{item.label}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </section>
+            )}
+          </div>
+
+          <aside className="min-w-0 space-y-6">
+            {(clinic.phone || clinic.email || websiteUrl || location) && (
+              <section className="rounded-3xl border border-gray-200 bg-white p-6">
+                <h2 className="text-xl font-black text-[#0B1D3A]">Contatti</h2>
+                <div className="mt-5 space-y-4 text-sm">
+                  {location && <p className="flex items-start gap-3 break-words text-gray-600"><MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{location}</span></p>}
+                  {clinic.phone && <a href={`tel:${clinic.phone}`} className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Phone className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.phone}</span></a>}
+                  {clinic.email && <a href={`mailto:${clinic.email}`} className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Mail className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>{clinic.email}</span></a>}
+                  {websiteUrl && <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-start gap-3 break-all text-gray-600 hover:text-[#0D47A1]"><Globe className="mt-0.5 h-5 w-5 shrink-0 text-[#00B39A]" aria-hidden="true" /><span>Visita il sito della struttura</span></a>}
+                </div>
+              </section>
+            )}
+
+            <section className="rounded-3xl bg-[#0D47A1] p-6 text-white">
+              <h2 className="text-xl font-black">Hai bisogno di orientamento?</h2>
+              <p className="mt-3 text-sm leading-relaxed text-blue-100">
+                Invia una richiesta generale a Facile Medical indicando le tue esigenze.
+              </p>
+              <Link href="/check-up" className="mt-6 block rounded-xl bg-white px-5 py-3 text-center font-bold text-[#0D47A1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00B39A] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0D47A1]">
+                Inizia la richiesta
               </Link>
-
-              <p className="mt-4 text-xs text-[#99E7DB] opacity-80">
-                ✓ Richiesta senza impegno ✓ Contatto diretto
-              </p>
-            </div>
-
-          </div>
-        </aside>
-
-      </div>
+            </section>
+          </aside>
+        </div>
+      </main>
     </div>
   );
 }

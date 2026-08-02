@@ -1,111 +1,97 @@
 "use client";
 
 import { useState } from "react";
+import { MapPin, Save } from "lucide-react";
+import ProfileSaveMessage, { type ProfileSaveState } from "@/components/clinics/profile/ProfileSaveMessage";
 import { createClient } from "@/lib/supabase/client";
-import { Save, MapPin } from "lucide-react";
 import type { Clinic } from "@/lib/types/database";
 
 export default function LocationSection({ clinic }: { clinic: Clinic }) {
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<ProfileSaveState | null>(null);
   const [formData, setFormData] = useState({
     address: clinic.address || "",
     city: clinic.city || "",
   });
   const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
+    setMessage(null);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("clinics")
       .update(formData)
-      .eq("id", clinic.id);
+      .eq("id", clinic.id)
+      .select("id")
+      .maybeSingle();
 
-    if (!error) {
-      alert("Indirizzo aggiornato con successo!");
-    }
-
+    setMessage(
+      error || !data
+        ? { kind: "error", text: error?.message || "Nessuna posizione aggiornata." }
+        : { kind: "success", text: "Indirizzo aggiornato." },
+    );
     setLoading(false);
   };
 
   return (
-    <section id="location" className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Indirizzo e Posizione</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Dove si trova la tua clinica
-        </p>
+    <section id="location" className="scroll-mt-24 rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-gray-200 p-4 sm:p-6">
+        <h2 className="text-xl font-bold text-gray-900">Indirizzo e posizione</h2>
+        <p className="mt-1 text-sm text-gray-600">Dove si trova la clinica.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Città */}
+      <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:space-y-6 sm:p-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Città *
-          </label>
+          <label htmlFor="clinic-city" className="mb-2 block text-sm font-semibold text-gray-700">Città *</label>
           <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
+              id="clinic-city"
               type="text"
               value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-              style={{ paddingLeft: '3.5rem' }}
-              className="w-full pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:border-transparent text-base"
-              placeholder="Es. Milano"
+              onChange={(event) => setFormData({ ...formData, city: event.target.value })}
+              className="pl-12"
+              placeholder="Es. Tirana"
               required
             />
           </div>
         </div>
 
-        {/* Indirizzo */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Indirizzo Completo *
-          </label>
+          <label htmlFor="clinic-address" className="mb-2 block text-sm font-semibold text-gray-700">Indirizzo completo *</label>
           <div className="relative">
-            <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
+              id="clinic-address"
               type="text"
               value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              style={{ paddingLeft: '3.5rem' }}
-              className="w-full pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:border-transparent text-base"
-              placeholder="Es. Via Roma 123, 20100"
+              onChange={(event) => setFormData({ ...formData, address: event.target.value })}
+              className="pl-12"
+              placeholder="Es. Rruga e Durrësit 100"
               required
             />
           </div>
         </div>
 
-        {/* Mappa Preview */}
         {formData.city && formData.address && (
-          <div className="bg-gray-100 rounded-lg p-4 border border-gray-200">
-            <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-              <MapPin className="w-4 h-4 text-[#0D47A1]" />
-              <span className="font-medium">Anteprima posizione:</span>
-            </div>
-            <div className="bg-gray-200 rounded-lg h-48 flex items-center justify-center">
-              <div className="text-center text-gray-500">
-                <MapPin className="w-10 h-10 mx-auto mb-2 text-[#0D47A1]" />
-                <p className="font-medium text-gray-700">{formData.address}</p>
-                <p className="text-sm">{formData.city}</p>
-              </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">
-              La mappa interattiva sarà disponibile con Google Maps API
-            </p>
+          <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500">Anteprima posizione</p>
+            <p className="mt-2 break-words font-semibold text-gray-800">{formData.address}, {formData.city}</p>
           </div>
         )}
 
-        {/* Submit */}
-        <div className="flex justify-end pt-4 border-t border-gray-200">
+        <ProfileSaveMessage state={message} />
+
+        <div className="flex border-t border-gray-200 pt-4 sm:justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 bg-[#0D47A1] text-white rounded-lg font-semibold hover:bg-[#0B3B86] transition disabled:opacity-50"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0D47A1] px-6 py-3 font-semibold text-white transition hover:bg-[#0B3B86] disabled:cursor-wait disabled:opacity-50 sm:w-auto"
           >
-            <Save className="w-5 h-5" />
-            {loading ? "Salvataggio..." : "Salva Indirizzo"}
+            <Save className="h-5 w-5" />
+            {loading ? "Salvataggio..." : "Salva indirizzo"}
           </button>
         </div>
       </form>

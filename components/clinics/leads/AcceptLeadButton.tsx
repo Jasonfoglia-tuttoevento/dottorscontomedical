@@ -11,27 +11,34 @@ export default function AcceptLeadButton({ matchId }: { matchId: string }) {
 
   const handleAccept = async () => {
     setLoading(true);
-    
-    const result = await setMatchStatus(matchId, "accepted");
 
-    if (result.ok) {
+    try {
+      const result = await setMatchStatus(matchId, "accepted");
+
+      if (!result.ok) {
+        window.alert(result.error);
+        return;
+      }
+
       router.refresh();
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
     <button
+      type="button"
       onClick={handleAccept}
       disabled={loading}
-      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition disabled:opacity-50"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-wait disabled:opacity-50"
       title="Accetta lead"
+      aria-label="Accetta lead"
     >
       {loading ? (
-        <div className="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+        <span className="block h-5 w-5 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
       ) : (
-        <Check className="w-5 h-5" />
+        <Check className="h-5 w-5" />
       )}
     </button>
   );

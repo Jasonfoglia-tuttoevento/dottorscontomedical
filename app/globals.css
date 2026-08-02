@@ -208,3 +208,22 @@ input:focus, textarea:focus, select:focus {
 .nav-link:hover {
   color: var(--color-primary);
 }
+
+/* Mobile QA baseline */
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: clip;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}

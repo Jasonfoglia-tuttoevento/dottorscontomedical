@@ -1,137 +1,134 @@
 "use client";
 
 import { useState } from "react";
+import { Globe, Mail, Phone, Save } from "lucide-react";
+import ProfileSaveMessage, { type ProfileSaveState } from "@/components/clinics/profile/ProfileSaveMessage";
 import { createClient } from "@/lib/supabase/client";
-import { Save, Phone, Mail, Globe } from "lucide-react";
 import type { Clinic } from "@/lib/types/database";
+
+function safePreviewUrl(value: string): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+}
 
 export default function ContactSection({ clinic }: { clinic: Clinic }) {
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<ProfileSaveState | null>(null);
   const [formData, setFormData] = useState({
     phone: clinic.phone || "",
     email: clinic.email || "",
     website: clinic.website || "",
   });
   const supabase = createClient();
+  const previewUrl = safePreviewUrl(formData.website);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
+    setMessage(null);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("clinics")
-      .update(formData)
-      .eq("id", clinic.id);
+      .update({
+        phone: formData.phone.trim(),
+        email: formData.email.trim().toLowerCase(),
+        website: formData.website.trim() || null,
+      })
+      .eq("id", clinic.id)
+      .select("id")
+      .maybeSingle();
 
-    if (!error) {
-      alert("Contatti aggiornati con successo!");
-    }
-
+    setMessage(
+      error || !data
+        ? { kind: "error", text: error?.message || "Nessun contatto aggiornato." }
+        : { kind: "success", text: "Contatti aggiornati." },
+    );
     setLoading(false);
   };
 
   return (
-    <section id="contact" className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-200">
+    <section id="contact" className="scroll-mt-24 rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-gray-200 p-4 sm:p-6">
         <h2 className="text-xl font-bold text-gray-900">Contatti</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Come i pazienti possono contattarti
-        </p>
+        <p className="mt-1 text-sm text-gray-600">Recapiti pubblici della struttura.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Telefono */}
+      <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:space-y-6 sm:p-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Telefono *
-          </label>
+          <label htmlFor="clinic-phone" className="mb-2 block text-sm font-semibold text-gray-700">Telefono *</label>
           <div className="relative">
-            <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
+              id="clinic-phone"
               type="tel"
               value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              style={{ paddingLeft: '3.5rem' }}
-              className="w-full pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:border-transparent text-base"
-              placeholder="Es. +39 02 1234567"
+              onChange={(event) => setFormData({ ...formData, phone: event.target.value })}
+              className="pl-12"
+              placeholder="Es. +355 4 123 4567"
               required
             />
           </div>
         </div>
 
-        {/* Email */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Email *
-          </label>
+          <label htmlFor="clinic-email" className="mb-2 block text-sm font-semibold text-gray-700">Email *</label>
           <div className="relative">
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
+              id="clinic-email"
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              style={{ paddingLeft: '3.5rem' }}
-              className="w-full pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:border-transparent text-base"
-              placeholder="Es. info@clinica.it"
+              onChange={(event) => setFormData({ ...formData, email: event.target.value })}
+              className="pl-12"
+              placeholder="Es. info@clinica.al"
               required
             />
           </div>
         </div>
 
-        {/* Sito Web */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Sito Web
-          </label>
+          <label htmlFor="clinic-website" className="mb-2 block text-sm font-semibold text-gray-700">Sito web</label>
           <div className="relative">
-            <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Globe className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
             <input
+              id="clinic-website"
               type="url"
               value={formData.website}
-              onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-              style={{ paddingLeft: '3.5rem' }}
-              className="w-full pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1] focus:border-transparent text-base"
-              placeholder="Es. https://www.clinica.it"
+              onChange={(event) => setFormData({ ...formData, website: event.target.value })}
+              className="pl-12"
+              placeholder="https://www.clinica.al"
             />
           </div>
         </div>
 
-        {/* Preview Contatti */}
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <h4 className="text-sm font-semibold text-gray-700 mb-3">Anteprima contatti pubblici:</h4>
-          <div className="space-y-2">
-            {formData.phone && (
-              <div className="flex items-center gap-2 text-sm">
-                <Phone className="w-4 h-4 text-[#0D47A1]" />
-                <span className="text-gray-700">{formData.phone}</span>
-              </div>
-            )}
-            {formData.email && (
-              <div className="flex items-center gap-2 text-sm">
-                <Mail className="w-4 h-4 text-[#0D47A1]" />
-                <span className="text-gray-700">{formData.email}</span>
-              </div>
-            )}
-            {formData.website && (
-              <div className="flex items-center gap-2 text-sm">
-                <Globe className="w-4 h-4 text-[#0D47A1]" />
-                <a href={formData.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  {formData.website}
-                </a>
-              </div>
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+          <h3 className="text-sm font-bold text-gray-800">Anteprima contatti pubblici</h3>
+          <div className="mt-3 space-y-2 text-sm text-gray-700">
+            {formData.phone && <p className="break-all">Telefono: {formData.phone}</p>}
+            {formData.email && <p className="break-all">Email: {formData.email}</p>}
+            {previewUrl && (
+              <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="block break-all font-semibold text-[#0D47A1] hover:underline">
+                {previewUrl}
+              </a>
             )}
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="flex justify-end pt-4 border-t border-gray-200">
+        <ProfileSaveMessage state={message} />
+
+        <div className="flex border-t border-gray-200 pt-4 sm:justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 bg-[#0D47A1] text-white rounded-lg font-semibold hover:bg-[#0B3B86] transition disabled:opacity-50"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0D47A1] px-6 py-3 font-semibold text-white transition hover:bg-[#0B3B86] disabled:cursor-wait disabled:opacity-50 sm:w-auto"
           >
-            <Save className="w-5 h-5" />
-            {loading ? "Salvataggio..." : "Salva Contatti"}
+            <Save className="h-5 w-5" />
+            {loading ? "Salvataggio..." : "Salva contatti"}
           </button>
         </div>
       </form>

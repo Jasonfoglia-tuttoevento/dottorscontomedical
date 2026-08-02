@@ -1,12 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useRef, useState } from "react";
+import { Image as ImageIcon, Trash2, Upload } from "lucide-react";
+import ProfileSaveMessage, { type ProfileSaveState } from "@/components/clinics/profile/ProfileSaveMessage";
 import { createClient } from "@/lib/supabase/client";
-import { Upload, Image as ImageIcon, X } from "lucide-react";
 import type { Clinic } from "@/lib/types/database";
 
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
 export default function GallerySection({ clinic }: { clinic: Clinic }) {
-  const [uploading, setUploading] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<"logo" | "cover" | null>(null);
+  const [removingCover, setRemovingCover] = useState(false);
+  const [message, setMessage] = useState<ProfileSaveState | null>(null);
   const [logoUrl, setLogoUrl] = useState(clinic.logo_url || "");
   const [coverUrl, setCoverUrl] = useState(clinic.cover_url || "");
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -14,170 +19,168 @@ export default function GallerySection({ clinic }: { clinic: Clinic }) {
   const supabase = createClient();
 
   const uploadImage = async (file: File, type: "logo" | "cover") => {
-    setUploading(type);
+    setMessage(null);
 
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${clinic.id}-${type}-${Date.now()}.${fileExt}`;
-    const filePath = `clinics/${fileName}`;
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      setMessage({ kind: "error", text: "Formato non supportato. Usa JPG, PNG o WEBP." });
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ kind: "error", text: "Il file deve essere inferiore a 5 MB." });
+      return;
+    }
+
+    setUploading(type);
+    const extension = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const filePath = `clinics/${clinic.id}-${type}-${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from("images")
-      .upload(filePath, file, { upsert: true });
+      .upload(filePath, file, { upsert: false, contentType: file.type });
 
     if (uploadError) {
-      alert("Errore nel caricamento: " + uploadError.message);
+      setMessage({ kind: "error", text: `Caricamento non riuscito: ${uploadError.message}` });
       setUploading(null);
       return;
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from("images")
-      .getPublicUrl(filePath);
+    const { data: publicData } = supabase.storage.from("images").getPublicUrl(filePath);
+    const publicUrl = publicData.publicUrl;
+    const field = type === "logo" ? "logo_url" : "cover_url";
+    const { data, error: updateError } = await supabase
+      .from("clinics")
+      .update({ [field]: publicUrl })
+      .eq("id", clinic.id)
+      .select("id")
+      .maybeSingle();
 
-    if (type === "logo") {
-      setLogoUrl(publicUrl);
-      await supabase.from("clinics").update({ logo_url: publicUrl }).eq("id", clinic.id);
-    } else {
-      setCoverUrl(publicUrl);
-      await supabase.from("clinics").update({ cover_url: publicUrl }).eq("id", clinic.id);
+    if (updateError || !data) {
+      await supabase.storage.from("images").remove([filePath]);
+      setMessage({ kind: "error", text: updateError?.message || "Immagine caricata ma profilo non aggiornato." });
+      setUploading(null);
+      return;
     }
 
+    if (type === "logo") setLogoUrl(publicUrl);
+    else setCoverUrl(publicUrl);
+
+    setMessage({ kind: "success", text: type === "logo" ? "Logo aggiornato." : "Copertina aggiornata." });
     setUploading(null);
-    alert("Immagine caricata con successo!");
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "cover") => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Il file deve essere inferiore a 5MB");
-        return;
-      }
-      uploadImage(file, type);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: "logo" | "cover") => {
+    const file = event.target.files?.[0];
+    if (file) void uploadImage(file, type);
+    event.target.value = "";
+  };
+
+  const removeCover = async () => {
+    if (!window.confirm("Rimuovere la foto di copertina?")) return;
+    setRemovingCover(true);
+    setMessage(null);
+
+    const { data, error } = await supabase
+      .from("clinics")
+      .update({ cover_url: null })
+      .eq("id", clinic.id)
+      .select("id")
+      .maybeSingle();
+
+    if (error || !data) {
+      setMessage({ kind: "error", text: error?.message || "Copertina non rimossa." });
+    } else {
+      setCoverUrl("");
+      setMessage({ kind: "success", text: "Copertina rimossa." });
     }
+
+    setRemovingCover(false);
   };
 
   return (
-    <section id="gallery" className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Galleria Foto</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Logo e foto di copertina della tua clinica
-        </p>
+    <section id="gallery" className="scroll-mt-24 rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-gray-200 p-4 sm:p-6">
+        <h2 className="text-xl font-bold text-gray-900">Galleria foto</h2>
+        <p className="mt-1 text-sm text-gray-600">Logo e copertina della pagina pubblica.</p>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* Logo */}
+      <div className="space-y-8 p-4 sm:p-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
-            Logo Clinica
-          </label>
-          <div className="flex items-start gap-6">
-            {/* Preview */}
-            <div className="w-32 h-32 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 overflow-hidden">
+          <h3 className="mb-3 text-sm font-semibold text-gray-700">Logo clinica</h3>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
+            <div className="flex h-32 w-32 shrink-0 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50">
               {logoUrl ? (
-                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain p-2" />
+                <img src={logoUrl} alt="Logo della clinica" className="h-full w-full object-contain p-2" />
               ) : (
-                <ImageIcon className="w-12 h-12 text-gray-300" />
+                <ImageIcon className="h-12 w-12 text-gray-300" />
               )}
             </div>
-
-            {/* Upload */}
-            <div className="flex-1">
+            <div className="min-w-0 flex-1">
               <input
                 ref={logoInputRef}
                 type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, "logo")}
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => handleFileChange(event, "logo")}
                 className="hidden"
               />
               <button
                 type="button"
                 onClick={() => logoInputRef.current?.click()}
-                disabled={uploading === "logo"}
-                className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-50 transition disabled:opacity-50"
+                disabled={uploading !== null}
+                className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold transition hover:bg-gray-50 disabled:cursor-wait disabled:opacity-50 sm:w-auto"
               >
-                {uploading === "logo" ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#0D47A1] border-t-transparent rounded-full animate-spin"></div>
-                    Caricamento...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Carica Logo
-                  </>
-                )}
+                <Upload className="h-4 w-4" />
+                {uploading === "logo" ? "Caricamento..." : "Carica logo"}
               </button>
-              <p className="text-xs text-gray-500 mt-2">
-                PNG, JPG o SVG. Max 5MB. Consigliato: 512x512px
-              </p>
+              <p className="mt-2 text-xs leading-5 text-gray-500">JPG, PNG o WEBP. Massimo 5 MB. Formato consigliato: quadrato.</p>
             </div>
           </div>
         </div>
 
-        {/* Cover */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
-            Foto di Copertina
-          </label>
-          <div className="space-y-4">
-            {/* Preview */}
-            <div className="w-full h-48 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center bg-gray-50 overflow-hidden relative">
-              {coverUrl ? (
-                <>
-                  <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
-                  <button
-                    onClick={() => {
-                      setCoverUrl("");
-                      supabase.from("clinics").update({ cover_url: null }).eq("id", clinic.id);
-                    }}
-                    className="absolute top-3 right-3 p-1.5 bg-[#0D47A1] text-white rounded-full hover:bg-[#0B3B86] transition"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </>
-              ) : (
-                <div className="text-center text-gray-400">
-                  <ImageIcon className="w-12 h-12 mx-auto mb-2" />
-                  <p className="text-sm">Nessuna foto di copertina</p>
-                </div>
-              )}
-            </div>
-
-            {/* Upload */}
-            <div>
-              <input
-                ref={coverInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleFileChange(e, "cover")}
-                className="hidden"
-              />
-              <button
-                type="button"
-                onClick={() => coverInputRef.current?.click()}
-                disabled={uploading === "cover"}
-                className="flex items-center gap-2 px-4 py-2.5 border border-gray-200 rounded-lg font-medium text-sm hover:bg-gray-50 transition disabled:opacity-50"
-              >
-                {uploading === "cover" ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-[#0D47A1] border-t-transparent rounded-full animate-spin"></div>
-                    Caricamento...
-                  </>
-                ) : (
-                  <>
-                    <Upload className="w-4 h-4" />
-                    Carica Foto di Copertina
-                  </>
-                )}
-              </button>
-              <p className="text-xs text-gray-500 mt-2">
-                JPG o PNG. Max 5MB. Consigliato: 1200x400px
-              </p>
-            </div>
+          <h3 className="mb-3 text-sm font-semibold text-gray-700">Foto di copertina</h3>
+          <div className="relative flex h-44 w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 sm:h-56">
+            {coverUrl ? (
+              <>
+                <img src={coverUrl} alt="Copertina della clinica" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={removeCover}
+                  disabled={removingCover || uploading !== null}
+                  aria-label="Rimuovi copertina"
+                  className="absolute right-3 top-3 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/95 text-rose-700 shadow-lg transition hover:bg-white disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </>
+            ) : (
+              <div className="text-center text-gray-400">
+                <ImageIcon className="mx-auto h-12 w-12" />
+                <p className="mt-2 text-sm">Nessuna copertina</p>
+              </div>
+            )}
           </div>
+
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            onChange={(event) => handleFileChange(event, "cover")}
+            className="hidden"
+          />
+          <button
+            type="button"
+            onClick={() => coverInputRef.current?.click()}
+            disabled={uploading !== null}
+            className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-semibold transition hover:bg-gray-50 disabled:cursor-wait disabled:opacity-50 sm:w-auto"
+          >
+            <Upload className="h-4 w-4" />
+            {uploading === "cover" ? "Caricamento..." : "Carica copertina"}
+          </button>
+          <p className="mt-2 text-xs leading-5 text-gray-500">JPG, PNG o WEBP. Massimo 5 MB. Formato orizzontale consigliato.</p>
         </div>
+
+        <ProfileSaveMessage state={message} />
       </div>
     </section>
   );

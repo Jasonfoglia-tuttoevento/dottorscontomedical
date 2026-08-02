@@ -31,6 +31,7 @@ const MATCH_WITH_CHECKUP_SELECT = `
 interface MatchFilters {
   status?: MatchStatus;
   since?: string;
+  before?: string;
   limit?: number;
 }
 
@@ -50,6 +51,9 @@ export async function getClinicMatches(
   }
   if (filters.since) {
     query = query.gte("created_at", filters.since);
+  }
+  if (filters.before) {
+    query = query.lt("created_at", filters.before);
   }
   if (filters.limit) {
     query = query.limit(filters.limit);
@@ -80,6 +84,9 @@ export async function countClinicMatches(
   if (filters.since) {
     query = query.gte("created_at", filters.since);
   }
+  if (filters.before) {
+    query = query.lt("created_at", filters.before);
+  }
 
   const { count, error } = await query;
 
@@ -95,18 +102,22 @@ export async function updateCurrentClinicMatchStatus(
   status: Extract<MatchStatus, "accepted" | "rejected">,
 ): Promise<void> {
   const clinicData = await getCurrentClinic();
+
   if (!clinicData?.clinic) {
     throw new Error("Accesso clinica non autorizzato.");
   }
 
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("matches")
     .update({ status })
     .eq("id", matchId)
-    .eq("clinic_id", clinicData.clinic.id);
+    .eq("clinic_id", clinicData.clinic.id)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
 
-  if (error) {
-    throw new Error("Impossibile aggiornare lo stato del match.");
+  if (error || !data) {
+    throw new Error("Il lead non è più disponibile oppure non appartiene alla clinica.");
   }
 }

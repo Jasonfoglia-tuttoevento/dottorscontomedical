@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Save } from "lucide-react";
+import ProfileSaveMessage, { type ProfileSaveState } from "@/components/clinics/profile/ProfileSaveMessage";
+import { createClient } from "@/lib/supabase/client";
 import type { Clinic } from "@/lib/types/database";
 
 export default function GeneralInfoSection({ clinic }: { clinic: Clinic }) {
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<ProfileSaveState | null>(null);
   const [formData, setFormData] = useState({
     name: clinic.name || "",
     category: clinic.category || "",
@@ -14,103 +16,87 @@ export default function GeneralInfoSection({ clinic }: { clinic: Clinic }) {
   });
   const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
+    setMessage(null);
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from("clinics")
       .update(formData)
-      .eq("id", clinic.id);
+      .eq("id", clinic.id)
+      .select("id")
+      .maybeSingle();
 
-    if (!error) {
-      alert("Informazioni aggiornate con successo!");
-    }
-
+    setMessage(
+      error || !data
+        ? { kind: "error", text: error?.message || "Nessuna clinica aggiornata. Verifica i permessi del profilo." }
+        : { kind: "success", text: "Informazioni generali aggiornate." },
+    );
     setLoading(false);
   };
 
   return (
-    <section id="general" className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900">Informazioni Generali</h2>
-        <p className="text-sm text-gray-600 mt-1">
-          Dati principali della tua clinica
-        </p>
+    <section id="general" className="scroll-mt-24 rounded-2xl border border-gray-200 bg-white shadow-sm">
+      <div className="border-b border-gray-200 p-4 sm:p-6">
+        <h2 className="text-xl font-bold text-gray-900">Informazioni generali</h2>
+        <p className="mt-1 text-sm text-gray-600">Dati principali della clinica.</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        {/* Nome Clinica */}
+      <form onSubmit={handleSubmit} className="space-y-5 p-4 sm:space-y-6 sm:p-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Nome Clinica *
-          </label>
+          <label htmlFor="clinic-name" className="mb-2 block text-sm font-semibold text-gray-700">Nome clinica *</label>
           <input
+            id="clinic-name"
             type="text"
             value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-            placeholder="Es. Clinica Dentale Roma"
+            onChange={(event) => setFormData({ ...formData, name: event.target.value })}
+            placeholder="Es. Clinica Dentale Tirana"
             required
           />
         </div>
 
-        {/* Categoria */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Categoria *
-          </label>
+          <label htmlFor="clinic-category" className="mb-2 block text-sm font-semibold text-gray-700">Categoria *</label>
           <select
+            id="clinic-category"
             value={formData.category}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
+            onChange={(event) => setFormData({ ...formData, category: event.target.value })}
             required
           >
             <option value="">Seleziona categoria</option>
-            <option value="dentali">Cliniche Dentali</option>
-            <option value="capelli">Trapianto Capelli</option>
-            <option value="estetica">Medicina Estetica</option>
+            <option value="dentali">Cliniche dentali</option>
           </select>
         </div>
 
-        {/* Descrizione */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Descrizione
-          </label>
+          <label htmlFor="clinic-description" className="mb-2 block text-sm font-semibold text-gray-700">Descrizione</label>
           <textarea
+            id="clinic-description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            rows={4}
-            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0D47A1]"
-            placeholder="Descrivi la tua clinica, specializzazioni, punti di forza..."
+            onChange={(event) => setFormData({ ...formData, description: event.target.value })}
+            rows={5}
+            placeholder="Descrivi specializzazioni, équipe e punti di forza."
           />
         </div>
 
-        {/* Stato del profilo */}
         {clinic.verified && (
-          <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs">✓</span>
-            </div>
-            <div>
-              <div className="font-semibold text-green-900">Profilo in evidenza</div>
-              <div className="text-sm text-green-700">
-                Il profilo della struttura è contrassegnato come attivo
-              </div>
-            </div>
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+            <p className="font-bold">Profilo verificato</p>
+            <p className="mt-1">La struttura è contrassegnata come verificata sulla piattaforma.</p>
           </div>
         )}
 
-        {/* Submit */}
-        <div className="flex justify-end pt-4 border-t border-gray-200">
+        <ProfileSaveMessage state={message} />
+
+        <div className="flex border-t border-gray-200 pt-4 sm:justify-end">
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center gap-2 px-6 py-3 bg-[#0D47A1] text-white rounded-lg font-semibold hover:bg-[#0B3B86] transition disabled:opacity-50"
+            className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0D47A1] px-6 py-3 font-semibold text-white transition hover:bg-[#0B3B86] disabled:cursor-wait disabled:opacity-50 sm:w-auto"
           >
-            <Save className="w-5 h-5" />
-            {loading ? "Salvataggio..." : "Salva Modifiche"}
+            <Save className="h-5 w-5" />
+            {loading ? "Salvataggio..." : "Salva modifiche"}
           </button>
         </div>
       </form>

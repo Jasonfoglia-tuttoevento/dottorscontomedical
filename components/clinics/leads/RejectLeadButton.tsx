@@ -10,30 +10,39 @@ export default function RejectLeadButton({ matchId }: { matchId: string }) {
   const router = useRouter();
 
   const handleReject = async () => {
-    if (!confirm("Sei sicuro di voler rifiutare questo lead?")) return;
-    
-    setLoading(true);
-    
-    const result = await setMatchStatus(matchId, "rejected");
-
-    if (result.ok) {
-      router.refresh();
+    if (!window.confirm("Confermi il rifiuto di questo lead?")) {
+      return;
     }
-    
-    setLoading(false);
+
+    setLoading(true);
+
+    try {
+      const result = await setMatchStatus(matchId, "rejected");
+
+      if (!result.ok) {
+        window.alert(result.error);
+        return;
+      }
+
+      router.refresh();
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <button
+      type="button"
       onClick={handleReject}
       disabled={loading}
-      className="p-2 text-[#0D47A1] hover:bg-[#E6FAF5] rounded-lg transition disabled:opacity-50"
+      className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
       title="Rifiuta lead"
+      aria-label="Rifiuta lead"
     >
       {loading ? (
-        <div className="w-5 h-5 border-2 border-[#0D47A1] border-t-transparent rounded-full animate-spin"></div>
+        <span className="block h-5 w-5 animate-spin rounded-full border-2 border-red-500 border-t-transparent" />
       ) : (
-        <X className="w-5 h-5" />
+        <X className="h-5 w-5" />
       )}
     </button>
   );

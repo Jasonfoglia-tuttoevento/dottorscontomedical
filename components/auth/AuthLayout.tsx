@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import BrandLogo from "@/components/brand/BrandLogo";
 import { brand } from "@/lib/brand";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
@@ -8,14 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Header con Logo */}
       <header className="w-full py-4 px-6">
         <Link href="/" className="inline-block">
-          <Image
-            src={brand.logoFull}
-            alt={brand.name}
-            width={1281}
-            height={252}
-            className="h-10 w-auto"
-            priority
-          />
+          <BrandLogo iconClassName="h-10 w-10" textClassName="text-lg sm:text-xl" priority />
         </Link>
       </header>
 
